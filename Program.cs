@@ -7,15 +7,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-//asfdasdfas;dlk
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-//zsdfsdfsdfsdfsd
 
 app.UseAuthorization();
 
