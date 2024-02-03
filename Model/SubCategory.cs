@@ -14,11 +14,9 @@ namespace WebStore.Model
         public string ImageURL { get; set; }
         public string IconURL { get; set; }
 
-        public List<Product> Products { get; set; }
-
-
         [ForeignKey("MainCategory")]
         public int MainCategoryId { get; set; }
+        public List<Product> Products { get; set; }
 
         public MainCategory MainCategory { get; set; }
 

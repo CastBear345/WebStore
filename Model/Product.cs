@@ -30,5 +30,7 @@ namespace WebStore.Model
         public int CountOfLikes { get; set; }
 
         public List<Review> Reviews { get; set; }
+
+        public List<ShoppingCartProduct> ShoppingCartProducts { get; set; }
     }
 }
