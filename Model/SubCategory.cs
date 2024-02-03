@@ -1,11 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace WebStore.Model
 {
     public class SubCategory
     {
         [Key]
+        [JsonIgnore]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
@@ -16,7 +19,11 @@ namespace WebStore.Model
 
         [ForeignKey("MainCategory")]
         public int MainCategoryId { get; set; }
+
+        [JsonIgnore]
         public List<Product> Products { get; set; }
+
+        [JsonIgnore]
 
         public MainCategory MainCategory { get; set; }
 

@@ -4,17 +4,16 @@ using System.Text.Json.Serialization;
 
 namespace WebStore.Model
 {
-    public class MainCategory
+    public class ListsOfProducts
     {
         [Key]
         [JsonIgnore]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
 
-        [Required]
+        public int Id { get; set; }
         public string Name { get; set; }
 
         [JsonIgnore]
-        public List<SubCategory> SubCategories { get; set; }
+        public List<Product> Products { get; set; }
     }
 }

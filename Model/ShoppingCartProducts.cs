@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace WebStore.Model
 {
-    public class ShoppingCartProduct
+    public class ShoppingCartProducts
     {
         [ForeignKey("ShoppingCart")]
         public int ShoppingCartId { get; set; }
@@ -11,8 +12,10 @@ namespace WebStore.Model
         public int ProductId { get; set; }
 
         public int Quantity { get; set; }
+        [JsonIgnore]
 
-        public ShoppingCart ShoppingCart { get; set; }
+        public ShoppingCarts ShoppingCart { get; set; }
+        [JsonIgnore]
 
         public Product Product { get; set; }
     }

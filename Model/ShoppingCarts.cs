@@ -4,17 +4,16 @@ using System.Text.Json.Serialization;
 
 namespace WebStore.Model
 {
-    public class MainCategory
+    public class ShoppingCarts
     {
         [Key]
         [JsonIgnore]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required]
-        public string Name { get; set; }
+        public decimal TotalSumOfPrices { get; set; }
 
         [JsonIgnore]
-        public List<SubCategory> SubCategories { get; set; }
+        public List<ShoppingCartProducts> ShoppingCartProducts { get; set; }
     }
 }

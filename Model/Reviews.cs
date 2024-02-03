@@ -1,12 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace WebStore.Model
 {
-    public class Review
+    public class Reviews
     {
         [Key]
-        public int ReviewId { get; set; }
+        [JsonIgnore]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
         public string Name { get; set; }
 
@@ -16,7 +19,7 @@ namespace WebStore.Model
 
         [ForeignKey("Product")]
         public int ProductId { get; set; }
-
+        [JsonIgnore]
         public Product Product { get; set; }
     }
 }
