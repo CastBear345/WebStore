@@ -15,6 +15,6 @@ namespace WebStore.Model
         public string Name { get; set; }
 
         [JsonIgnore]
-        public List<SubCategory> SubCategories { get; set; }
+        public List<SubCategory> SubCategory { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace WebStore.Model
         public int Quantity { get; set; }
         [JsonIgnore]
 
-        public ShoppingCarts ShoppingCart { get; set; }
+        public ShoppingCarts ShoppingCarts { get; set; }
         [JsonIgnore]
 
         public Product Product { get; set; }

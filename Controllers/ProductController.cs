@@ -71,18 +71,59 @@ namespace WebStore.Controllers
             return Ok("Продукт успешно добавлен");
         }
         [HttpPost]
-        public async Task<ActionResult> AddProducts(Product products)
+        public async Task<ActionResult> AddProduct(Product product)
         {
-            if (products == null)
+            if (product == null)
             {
                 return BadRequest("Отсутствуют данные о продуктах для добавления");
             }
-            var newProduct = products;
-            _context.Product.AddRange(newProduct);
+
+            _context.Product.Add(product);
 
             await _context.SaveChangesAsync();
 
             return Ok("Продукты успешно добавлены");
+        }
+
+        
+            // GET: api/product/smartphones
+            [HttpGet("smartphones")]
+            public async Task<ActionResult<IEnumerable<Product>>> GetSmartphones()
+            {
+                // Получаем все продукты субкатегории "Smartphones"
+                var products = await _context.Product
+                    .Where(p => p.SubCategoryId == 1)
+                    .ToListAsync();
+
+                if (products == null || products.Count == 0)
+                {
+                    return NotFound("Продукты не найдены");
+                }
+
+                return Ok(products);
+            }
+        [HttpGet("GetSubCategory/{subCategoryId}")]
+        public async Task<ActionResult<SubCategory>> GetSubCategory(int subCategoryId)
+        {
+            var subCategory = await _context.SubCategory.FindAsync(subCategoryId);
+
+            if (subCategory == null)
+            {
+                return NotFound(); // Или другой код статуса в зависимости от ваших требований
+            }
+
+            return Ok(subCategory);
+        }
+
+        [HttpGet("Smart")]
+        public ActionResult<IEnumerable<Product>> GetSmartphonesProducts()
+        {
+            var smartphonesProducts = _context.Product
+                .Include(p => p.SubCategory)
+                .Where(p => p.SubCategory.Name == "Smartphones")
+                .ToList();
+
+            return Ok(smartphonesProducts);
         }
 
     }

@@ -21,7 +21,7 @@ namespace WebStore.Model
         public int MainCategoryId { get; set; }
 
         [JsonIgnore]
-        public List<Product> Products { get; set; }
+        public List<Product> Product { get; set; }
 
         [JsonIgnore]
 
