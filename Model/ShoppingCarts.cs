@@ -14,6 +14,6 @@ namespace WebStore.Model
         public decimal TotalSumOfPrices { get; set; }
 
         [JsonIgnore]
-        public List<ShoppingCartProducts> ShoppingCartProducts { get; set; }
+        public List<ShoppingCartProducts>? ShoppingCartProducts { get; set; }
     }
 }

@@ -20,6 +20,6 @@ namespace WebStore.Model
         [ForeignKey("Product")]
         public int ProductId { get; set; }
         [JsonIgnore]
-        public Product Product { get; set; }
+        public Product? Product { get; set; }
     }
 }

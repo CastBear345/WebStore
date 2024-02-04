@@ -126,5 +126,6 @@ namespace WebStore.Controllers
             return Ok(smartphonesProducts);
         }
 
+        
     }
 }

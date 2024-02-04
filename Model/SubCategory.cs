@@ -21,11 +21,11 @@ namespace WebStore.Model
         public int MainCategoryId { get; set; }
 
         [JsonIgnore]
-        public List<Product> Product { get; set; }
+        public List<Product>? Product { get; set; }
 
         [JsonIgnore]
 
-        public MainCategory MainCategory { get; set; }
+        public MainCategory? MainCategory { get; set; }
 
 
     }
