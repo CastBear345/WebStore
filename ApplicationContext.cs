@@ -31,7 +31,7 @@ namespace WebStore
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+
 
 
             modelBuilder.Entity<SubCategory>()
@@ -61,19 +61,24 @@ namespace WebStore
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.ListOfProducts)
                 .WithMany(lsp => lsp.Product)
-                .HasForeignKey(p=> p.ListOfProductsId);
+                .HasForeignKey(p => p.ListOfProductsId);
 
             modelBuilder.Entity<Product>()
                 .HasMany(p => p.Reviews)  // Один продукт имеет много отзывов
                 .WithOne(r => r.Product)  // Отзыв относится к одному продукту
                 .HasForeignKey(r => r.ProductId)  // Внешний ключ в таблице Reviews
-                .IsRequired(false);  // Отзывы могут быть null
+                .IsRequired(false); // Отзывы могут быть null
+
+
 
             modelBuilder.Entity<Product>()
                 .HasMany(p => p.ShoppingCartProducts)  // Один продукт может быть в нескольких корзинах
                 .WithOne(sp => sp.Product)  // Каждый элемент корзины относится к одному продукту
                 .HasForeignKey(sp => sp.ProductId)  // Внешний ключ в таблице ShoppingCartProducts
                 .IsRequired(false);  // Элементы корзины могут быть null
+
+
+
 
         }
     }
