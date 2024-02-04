@@ -9,123 +9,82 @@ namespace WebStore.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        
-        private readonly ApplicationContext _context; // Замените WebStoreDbContext на ваш контекст базы данных
 
+        private readonly ApplicationContext _context;
         public ProductController(ApplicationContext context)
         {
             _context = context;
-            
+
         }
 
-        
 
-        [HttpGet]
+        // Output of all products
+        [HttpGet("getProducts")]
         public IActionResult GetProducts()
         {
+            // Find all products
             var products = _context.Product
                 .Select(p => p.Name)
                 .ToList();
 
+            // Return all products
             return Ok(products);
-
         }
-        [HttpGet("get/{productId}")]
+
+
+        // Product output by Id
+        [HttpGet("getProduct/{productId}")]
         public async Task<ActionResult<Product>> GetProduct(int productId)
         {
-
-            // Находим продукт в базе данных по идентификатору
+            // Finding a product in the database by identifier
             var product = await _context.Product.FindAsync(productId);
 
-            // Если продукт не найден, возвращаем NotFound
+            // If the product is not found, return NotFound
             if (product == null)
             {
                 return NotFound();
             }
 
-            // Возвращаем продукт в формате JSON
+            // Returning the product in JSON format
             return Ok(product);
         }
 
-        [HttpPost("insert")]
-        public async Task<ActionResult> InsertProduct()
-        {
-            // Создаем новый объект Product
-            var newProduct = new Product
-            {
-                Name = "iPhone 12",
-                ImageURL = "iphone12.jpg",
-                SubCategoryId = 1,
-                ListOfProductsId = 1,
-                Description = "Latest iPhone model",
-                Price = 999.99m,
-                CountOfLikes = 15
-            };
 
-            // Добавляем новый продукт в контекст
-            _context.Product.Add(newProduct);
-
-            // Сохраняем изменения в базе данных
-            await _context.SaveChangesAsync();
-
-            return Ok("Продукт успешно добавлен");
-        }
-        [HttpPost]
+        // Adding a product
+        [HttpPost("addProduct")]
         public async Task<ActionResult> AddProduct(Product product)
         {
+            // Check product for null
             if (product == null)
             {
-                return BadRequest("Отсутствуют данные о продуктах для добавления");
+                return BadRequest("There are no product data to add");
             }
 
+            // Save data
             _context.Product.Add(product);
-
             await _context.SaveChangesAsync();
 
-            return Ok("Продукты успешно добавлены");
+            return Ok("Products added successfully");
         }
 
-        
-            // GET: api/product/smartphones
-            [HttpGet("smartphones")]
-            public async Task<ActionResult<IEnumerable<Product>>> GetSmartphones()
-            {
-                // Получаем все продукты субкатегории "Smartphones"
-                var products = await _context.Product
-                    .Where(p => p.SubCategoryId == 1)
-                    .ToListAsync();
 
-                if (products == null || products.Count == 0)
-                {
-                    return NotFound("Продукты не найдены");
-                }
-
-                return Ok(products);
-            }
-        [HttpGet("GetSubCategory/{subCategoryId}")]
-        public async Task<ActionResult<SubCategory>> GetSubCategory(int subCategoryId)
+        // To retrieve all products from subcategories
+        [HttpGet("{SubCategoryName}")]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsFromSubCategory(string SubCategoryName)
         {
-            var subCategory = await _context.SubCategory.FindAsync(subCategoryId);
-
-            if (subCategory == null)
-            {
-                return NotFound(); // Или другой код статуса в зависимости от ваших требований
-            }
-
-            return Ok(subCategory);
-        }
-
-        [HttpGet("Smart")]
-        public ActionResult<IEnumerable<Product>> GetSmartphonesProducts()
-        {
-            var smartphonesProducts = _context.Product
+            // Receiving all products of a subcategory.
+            var products = await _context.Product
                 .Include(p => p.SubCategory)
-                .Where(p => p.SubCategory.Name == "Smartphones")
-                .ToList();
+                .Where(p => p.SubCategory.Name == SubCategoryName)
+                .ToListAsync();
 
-            return Ok(smartphonesProducts);
+            if (products == null || products.Count == 0)
+            {
+                return NotFound("Продукты не найдены");
+            }
+
+            return Ok(products);
         }
 
-        
     }
 }
