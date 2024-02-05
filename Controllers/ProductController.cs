@@ -31,6 +31,19 @@ namespace WebStore.Controllers
             return Ok(products);
         }
 
+        [HttpGet("GetSubcategories")]
+        public IActionResult GetSubcategories()
+        {
+            // Find all products
+            var products = _context.MainCategory
+                //.Select(p => p.Name)
+                .ToList();
+
+            // Return all products
+
+  
+            return Ok(products);
+        }
 
         // Product output by Id
         [HttpGet("getProduct/{productId}")]
