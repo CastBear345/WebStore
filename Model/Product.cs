@@ -6,6 +6,7 @@ namespace WebStore.Model
 {
     public class Product
     {
+
         [Key]
         [JsonIgnore]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -25,6 +26,7 @@ namespace WebStore.Model
         public string Description { get; set; }
         public decimal Price { get; set; }
         public int CountOfLikes { get; set; }
+
 
 
         [JsonIgnore]
