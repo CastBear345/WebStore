@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebStore.Model;
@@ -16,9 +17,9 @@ namespace WebStore.Controllers
 
         }
 
-
         // To retrieve all products from subcategories
         [HttpGet("{SubCategoryName}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Product>>> GetProductsFromSubCategory(string SubCategoryName)
         {
             // Receiving all products of a subcategory.
@@ -34,8 +35,6 @@ namespace WebStore.Controllers
 
             return Ok(products);
         }
-
-
 
     }
 }
