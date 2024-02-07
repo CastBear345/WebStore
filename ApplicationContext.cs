@@ -1,10 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Swagger.Model;
 using WebStore.Model;
 
 namespace WebStore
 {
+    /// <summary>
+    /// Представляет контекст базы данных приложения.
+    /// </summary>
     public class ApplicationContext : DbContext
     {
+        /// <summary>
+        /// Набор данных пользователей.
+        /// </summary>
+        public DbSet<User> Users { get; set; }
         public DbSet<MainCategory> MainCategory { get; set; }
         public DbSet<SubCategory> SubCategory { get; set; }
         public DbSet<ListsOfProducts> ListsOfProducts { get; set; }
@@ -14,14 +22,8 @@ namespace WebStore
         public DbSet<ShoppingCartProducts> ShoppingCartProducts { get; set; }
 
 
+        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options){}
 
-
-
-
-        public ApplicationContext(DbContextOptions<ApplicationContext> options)
-        : base(options)
-        {
-        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Добавьте логгирование запросов EF
@@ -32,7 +34,10 @@ namespace WebStore
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-
+            // Указываем, что Id должен генерироваться при добавлении записи
+            modelBuilder.Entity<User>()
+                .Property(u => u.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<SubCategory>()
                 .HasOne(sc => sc.MainCategory)

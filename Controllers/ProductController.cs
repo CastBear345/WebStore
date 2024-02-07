@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using WebStore.Model.ModelDTO;
 using WebStore.Model;
-using WebStore.ModelDTO;
 
 namespace WebStore.Controllers
 {
