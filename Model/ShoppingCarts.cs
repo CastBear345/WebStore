@@ -13,6 +13,8 @@ namespace WebStore.Model
 
         public decimal TotalSumOfPrices { get; set; }
 
+        public string Description {  get; set; }
+
         [JsonIgnore]
         public List<ShoppingCartProducts>? ShoppingCartProducts { get; set; }
     }
