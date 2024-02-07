@@ -14,10 +14,5 @@ public class LoginResponseDTO
     /// </summary>
     public User User { get; set; }
 
-    /// <summary>
-    /// Токен аутентификации, который может использоваться для последующих запросов.
-    /// </summary>
-    public string Token { get; set; }
-
     #endregion
 }
