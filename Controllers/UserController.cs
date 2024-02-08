@@ -15,14 +15,14 @@ namespace Swagger.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly ApplicationContext _context;
+    private readonly ApplicationDbContext _context;
     protected APIResponse _response;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="UserController"/>.
     /// </summary>
     /// <param name="context">Контекст базы данных приложения.</param>
-    public UserController(ApplicationContext context)
+    public UserController(ApplicationDbContext context)
     {
         _context = context;
         this._response = new();

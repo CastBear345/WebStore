@@ -1,42 +1,116 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Swagger.Models;
+using System.Net;
 using WebStore.Model;
 
-namespace WebStore.Controllers
+namespace WebStore.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ReviewController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ReviewController : ControllerBase
+    private readonly ApplicationDbContext _context;
+    protected APIResponse _response;
+
+    public ReviewController(ApplicationDbContext context)
     {
-        private readonly ApplicationContext _context; // Замените WebStoreDbContext на ваш контекст базы данных
+        _context = context;
+        this._response = new();
+    }
 
-        public ReviewController(ApplicationContext context)
+    [Authorize]
+    [HttpGet("{productId}/reviews")]
+    public ActionResult<IEnumerable<Reviews>> GetProductReviews(int productId)
+    {
+        // Используйте контекст данных для получения отзывов для конкретного продукта
+        var reviews = _context.Reviews.Where(r => r.ProductId == productId).ToList();
+
+        _response.StatusCode = HttpStatusCode.OK;
+        _response.IsSuccess = true;
+        _response.Result = reviews;
+        return Ok(_response);
+    }
+
+    [Authorize]
+    [HttpPost("{productId}/reviews")]
+    public async Task<ActionResult<Reviews>> AddReview(int productId, Reviews review)
+    {
+        if (review == null)
         {
-            _context = context;
-
+            _response.StatusCode = HttpStatusCode.BadRequest;
+            _response.IsSuccess = true;
+            _response.ErrorMessages.Add("Отсутствуют данные о отзыве для добавления");
+            return BadRequest(_response);
         }
 
-        [HttpGet("{productId}/reviews")]
-        public ActionResult<IEnumerable<Reviews>> GetProductReviews(int productId)
+        review.ProductId = productId; // Устанавливаем идентификатор продукта
+
+        _context.Reviews.Add(review);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetProductReviews), new { productId }, review);
+    }
+
+    [Authorize]
+    [HttpDelete("{productId}/reviews/{reviewId}")]
+    public async Task<ActionResult> DeleteReview(int productId, int reviewId)
+    {
+        var review = await _context.Reviews.FindAsync(reviewId);
+
+        if (review == null)
         {
-            // Используйте контекст данных для получения отзывов для конкретного продукта
-            var reviews = _context.Reviews.Where(r => r.ProductId == productId).ToList();
-
-            return Ok(reviews);
+            _response.StatusCode = HttpStatusCode.NotFound;
+            _response.IsSuccess = true;
+            return NotFound(_response);
         }
-        [HttpPost("reviews")]
-        public async Task<ActionResult<Reviews>> AddReview(Reviews review)
+
+        if (review.ProductId != productId)
         {
-            if (review == null)
-            {
-                return BadRequest("Отсутствуют данные о отзыве для добавления");
-            }
-
-            _context.Reviews.Add(review);
-            await _context.SaveChangesAsync();
-
-            return Ok("Отзыв успешно добавлен");
+            _response.StatusCode = HttpStatusCode.BadRequest;
+            _response.IsSuccess = true;
+            _response.ErrorMessages.Add("Идентификатор продукта не соответствует существующему отзыву");
+            return BadRequest(_response);
         }
+
+        _context.Reviews.Remove(review);
+        await _context.SaveChangesAsync();
+
+        _response.StatusCode = HttpStatusCode.OK;
+        _response.IsSuccess = true;
+        return Ok(_response);
+    }
+
+    [Authorize]
+    [HttpPut("{productId}/reviews/{reviewId}")]
+    public async Task<ActionResult<Reviews>> UpdateReview(int productId, int reviewId, Reviews updatedReview)
+    {
+        if (updatedReview == null || updatedReview.Id != reviewId)
+        {
+            _response.StatusCode = HttpStatusCode.BadRequest;
+            _response.IsSuccess = true;
+            return BadRequest(_response);
+        }
+
+        var existingReview = await _context.Reviews.FindAsync(reviewId);
+
+        if (existingReview == null)
+        {
+            _response.StatusCode = HttpStatusCode.NotFound;
+            _response.IsSuccess = true;
+            return NotFound(_response);
+        }
+
+        existingReview.Name = updatedReview.Name;
+        existingReview.Content = updatedReview.Content;
+        existingReview.Grade = updatedReview.Grade;
+        existingReview.ProductId = productId; // Идентификатор продукта
+
+        await _context.SaveChangesAsync();
+
+        _response.StatusCode = HttpStatusCode.OK;
+        _response.IsSuccess = true;
+        _response.Result = existingReview;
+        return Ok(_response);
     }
 }

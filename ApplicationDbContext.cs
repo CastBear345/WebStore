@@ -7,7 +7,7 @@ namespace WebStore
     /// <summary>
     /// Представляет контекст базы данных приложения.
     /// </summary>
-    public class ApplicationContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
         /// <summary>
         /// Набор данных пользователей.
@@ -22,7 +22,7 @@ namespace WebStore
         public DbSet<ShoppingCartProducts> ShoppingCartProducts { get; set; }
 
 
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options){}
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -38,6 +38,7 @@ namespace WebStore
             modelBuilder.Entity<User>()
                 .Property(u => u.Id)
                 .ValueGeneratedOnAdd();
+
 
             modelBuilder.Entity<SubCategory>()
                 .HasOne(sc => sc.MainCategory)
@@ -74,16 +75,11 @@ namespace WebStore
                 .HasForeignKey(r => r.ProductId)  // Внешний ключ в таблице Reviews
                 .IsRequired(false); // Отзывы могут быть null
 
-
-
             modelBuilder.Entity<Product>()
                 .HasMany(p => p.ShoppingCartProducts)  // Один продукт может быть в нескольких корзинах
                 .WithOne(sp => sp.Product)  // Каждый элемент корзины относится к одному продукту
                 .HasForeignKey(sp => sp.ProductId)  // Внешний ключ в таблице ShoppingCartProducts
                 .IsRequired(false);  // Элементы корзины могут быть null
-
-
-
 
         }
     }

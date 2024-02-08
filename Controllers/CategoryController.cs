@@ -9,8 +9,8 @@ namespace WebStore.Controllers;
 [Route("categories")]
 public class CategoryController : ControllerBase
 {
-    private readonly ApplicationContext _context;
-    public CategoryController(ApplicationContext context)
+    private readonly ApplicationDbContext _context;
+    public CategoryController(ApplicationDbContext context)
     {
         _context = context;
     }

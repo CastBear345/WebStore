@@ -10,8 +10,8 @@ namespace WebStore.Controllers
     [ApiController]
     public class SubCategoryController : ControllerBase
     {
-        private readonly ApplicationContext _context;
-        public SubCategoryController(ApplicationContext context)
+        private readonly ApplicationDbContext _context;
+        public SubCategoryController(ApplicationDbContext context)
         {
             _context = context;
         }

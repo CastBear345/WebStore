@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Swagger.Model;
 using System.Text;
 using WebStore;
+using Swagger.Models;
 
 namespace Swagger.Repository;
 
@@ -14,8 +15,8 @@ public class UserRepository : IUserRepository
 {
     #region Поля
 
-    private readonly ApplicationContext _context;
-    private readonly IConfiguration _configuration;
+    private readonly ApplicationDbContext _context;
+    protected APIResponse _response;
 
     #endregion
 
@@ -26,7 +27,7 @@ public class UserRepository : IUserRepository
     /// </summary>
     /// <param name="context">Контекст базы данных приложения.</param>
     /// <param name="configuration">Конфигурация приложения.</param>
-    public UserRepository(ApplicationContext context, IConfiguration configuration)
+    public UserRepository(ApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;

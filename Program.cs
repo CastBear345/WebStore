@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication().AddCookie("cookie");
 
 // Добавление подключения к базе данных
-builder.Services.AddDbContext<ApplicationContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
