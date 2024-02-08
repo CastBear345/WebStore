@@ -17,7 +17,7 @@ namespace Swagger.Controllers;
 public class AdministrationController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
-    private readonly ApplicationContext _context;
+    private readonly ApplicationDbContext _context;
     protected APIResponse _response;
 
     /// <summary>
@@ -25,7 +25,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     /// <param name="userRepository">Репозиторий пользователей.</param>
     /// <param name="context">Контекст базы данных приложения.</param>
-    public AdministrationController(IUserRepository userRepository, ApplicationContext context)
+    public AdministrationController(IUserRepository userRepository, ApplicationDbContext context)
     {
         _userRepository = userRepository;
         _context = context;
