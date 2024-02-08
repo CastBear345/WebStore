@@ -27,10 +27,9 @@ public class UserRepository : IUserRepository
     /// </summary>
     /// <param name="context">Контекст базы данных приложения.</param>
     /// <param name="configuration">Конфигурация приложения.</param>
-    public UserRepository(ApplicationDbContext context, IConfiguration configuration)
+    public UserRepository(ApplicationDbContext context)
     {
         _context = context;
-        _configuration = configuration;
     }
 
     #endregion

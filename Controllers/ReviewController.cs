@@ -83,9 +83,9 @@ public class ReviewController : ControllerBase
 
     [Authorize]
     [HttpPut("{productId}/reviews/{reviewId}")]
-    public async Task<ActionResult<Reviews>> UpdateReview(int productId, int reviewId, Reviews updatedReview)
+    public async Task<ActionResult<Reviews>> UpdateReview(int productId, int? reviewId, Reviews updatedReview)
     {
-        if (updatedReview == null || updatedReview.Id != reviewId)
+        if (updatedReview == null || reviewId == null)
         {
             _response.StatusCode = HttpStatusCode.BadRequest;
             _response.IsSuccess = true;
@@ -104,7 +104,7 @@ public class ReviewController : ControllerBase
         existingReview.Name = updatedReview.Name;
         existingReview.Content = updatedReview.Content;
         existingReview.Grade = updatedReview.Grade;
-        existingReview.ProductId = productId; // Идентификатор продукта
+        existingReview.ProductId = productId;
 
         await _context.SaveChangesAsync();
 
