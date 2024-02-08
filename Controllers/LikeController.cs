@@ -6,8 +6,8 @@ namespace WebStore.Controllers;
 [Route("{productId}/likes")]
 public class LikeController : ControllerBase
 {
-    private readonly ApplicationContext _context;
-    public LikeController(ApplicationContext context)
+    private readonly ApplicationDbContext _context;
+    public LikeController(ApplicationDbContext context)
     {
         _context = context;
     }

@@ -10,8 +10,8 @@ namespace WebStore.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ApplicationContext _context;
-        public ProductController(ApplicationContext context)
+        private readonly ApplicationDbContext _context;
+        public ProductController(ApplicationDbContext context)
         {
             _context = context;
         }

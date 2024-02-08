@@ -67,7 +67,7 @@ public class AuthorizationController : ControllerBase
 
         await HttpContext.SignInAsync(new ClaimsPrincipal(ClaimsIdentity(loginResponse)));
 
-        // Возвращаем данные пользователя вместе с токеном в ответе
+        // Возвращаем данные пользователя
         _response.StatusCode = HttpStatusCode.OK;
         _response.IsSuccess = true;
         _response.Result = loginResponse;
