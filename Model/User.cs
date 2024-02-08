@@ -18,13 +18,15 @@ public class User
     /// Имя пользователя.
     /// </summary>
     [StringLength(100)]
-    public required string UserName { get; set; } = String.Empty;
+    [Required]
+    public string UserName { get; set; } = String.Empty;
 
     /// <summary>
     /// Хэш пароля пользователя.
     /// </summary>
     [StringLength(500)]
-    public required string PasswordHash { get; set; } = String.Empty;
+    [Required]
+    public string PasswordHash { get; set; } = String.Empty;
 
     /// <summary>
     /// Соль для хэширования пароля пользователя.
@@ -36,12 +38,14 @@ public class User
     /// Имя пользователя.
     /// </summary>
     [StringLength(200)]
+    [Required]
     public string FirstName { get; set; } = String.Empty;
 
     /// <summary>
     /// Фамилия пользователя.
     /// </summary>
     [StringLength(200)]
+    [Required]
     public string LastName { get; set; } = String.Empty;
 
     /// <summary>
@@ -53,6 +57,7 @@ public class User
     /// Адрес пользователя.
     /// </summary>
     [StringLength(600)]
+    [Required]
     public string Address { get; set; } = String.Empty;
 
     /// <summary>

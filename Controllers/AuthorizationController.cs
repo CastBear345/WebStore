@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Swagger.Models.ModelsDTO;
+using System.Security.Claims;
 using Swagger.Repository;
 using Swagger.Models;
 using System.Net;
@@ -11,6 +14,7 @@ namespace Swagger.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [ApiController]
+[AllowAnonymous]
 public class AuthorizationController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
@@ -61,6 +65,8 @@ public class AuthorizationController : ControllerBase
 
         var loginResponse = await _userRepository.Login(loginRequest);
 
+        await HttpContext.SignInAsync(new ClaimsPrincipal(ClaimsIdentity(loginResponse)));
+
         // Возвращаем данные пользователя вместе с токеном в ответе
         _response.StatusCode = HttpStatusCode.OK;
         _response.IsSuccess = true;
@@ -77,16 +83,32 @@ public class AuthorizationController : ControllerBase
     public async Task<ActionResult> Login(LoginRequestDTO model)
     {
         var loginResponse = await _userRepository.Login(model);
-        if (loginResponse.User == null || string.IsNullOrEmpty(loginResponse.Token))
+        if (loginResponse.User is null)
         {
-            _response.StatusCode = HttpStatusCode.BadRequest;
+            _response.StatusCode = HttpStatusCode.Unauthorized;
             _response.IsSuccess = false;
             _response.ErrorMessages.Add("Имя пользователя или пароль неверны");
-            return BadRequest(_response);
+            return Unauthorized(_response);
         }
+
+        await HttpContext.SignInAsync(new ClaimsPrincipal(ClaimsIdentity(loginResponse)));
+
         _response.StatusCode = HttpStatusCode.OK;
         _response.IsSuccess = true;
         _response.Result = loginResponse;
         return Ok(_response);
+    }
+
+    private static ClaimsIdentity ClaimsIdentity(LoginResponseDTO loginResponse)
+    {
+        var claims = new List<Claim>() {
+            new(ClaimTypes.NameIdentifier, loginResponse.User.Id.ToString()),
+            new(ClaimTypes.Name, loginResponse.User.UserName),
+            new(ClaimTypes.Role, loginResponse.User.Roles.ToString()),
+            new(ClaimTypes.GivenName, loginResponse.User.FirstName + " " + loginResponse.User.LastName),
+        };
+
+        var claimsIdentity = new ClaimsIdentity(claims, "cookie");
+        return claimsIdentity;
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Swagger.Models.ModelsDTO;
 using System.Security.Claims;
-using Swagger.Helpers;
 using Swagger.Model;
 using System.Text;
 using WebStore;
@@ -70,24 +69,9 @@ public class UserRepository : IUserRepository
 
             if (isPasswordValid)
             {
-                // Если пароль верный, выполняем создание токена и возвращаем данные пользователя
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value!));
-                var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-                var expiration = DateTime.UtcNow.AddDays(5);
-
-                var claims = new List<Claim>() {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Role, user.Roles.ToString()),
-                    new Claim(ClaimTypes.GivenName, user.FirstName + " " + user.LastName),
-                    new Claim(ClaimTypes.Expiration, expiration.ToString()),
-                };
-
-                var jwt = JWTTokenHelpers.CreateTokenString(claims, expiration, credentials);
 
                 var loginResponseDTO = new LoginResponseDTO()
                 {
-                    Token = jwt,
                     User = user,
                 };
 
@@ -98,7 +82,6 @@ public class UserRepository : IUserRepository
         // Если пользователь не найден или пароль неверный, возвращаем пустой токен и null вместо данных пользователя
         return new LoginResponseDTO
         {
-            Token = "",
             User = null
         };
     }
