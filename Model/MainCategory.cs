@@ -7,14 +7,14 @@ namespace WebStore.Model
     public class MainCategory
     {
         [Key]
-        [JsonIgnore]
+        //[JsonIgnore]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
         public string Name { get; set; }
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public List<SubCategory>? SubCategory { get; set; }
     }
 }

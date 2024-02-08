@@ -7,13 +7,12 @@ namespace WebStore.Model
     public class SubCategory
     {
         [Key]
-        [JsonIgnore]
+        //[JsonIgnore]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
         public string Name { get; set; }
-
         public string ImageURL { get; set; }
         public string IconURL { get; set; }
 
@@ -24,9 +23,6 @@ namespace WebStore.Model
         public List<Product>? Product { get; set; }
 
         [JsonIgnore]
-
         public MainCategory? MainCategory { get; set; }
-
-
     }
 }

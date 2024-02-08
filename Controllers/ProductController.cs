@@ -5,85 +5,70 @@ using WebStore.Model;
 
 namespace WebStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("products")]
     [ApiController]
     public class ProductController : ControllerBase
     {
-
         private readonly ApplicationContext _context;
         public ProductController(ApplicationContext context)
         {
             _context = context;
-
         }
 
-
-        // Output of all products
-        [HttpGet("getProducts")]
-        public IActionResult GetProducts()
+        [HttpGet("{subcategoryId}")]
+        public IActionResult GetProductsBySubCategory(int subcategoryId)
         {
-            // Find all products
-            var products = _context.Product
-                .Select(p => p.Name)
-                .ToList();
+            if (_context.SubCategory.FirstOrDefault(s => s.Id == subcategoryId) == null)
+            {
+                return NotFound();
+            }
 
-            // Return all products
+            var products = _context.Product.Where(c => c.SubCategoryId == subcategoryId).ToList();
+
             return Ok(products);
         }
-
-        [HttpGet("GetSubcategories")]
-        public IActionResult GetSubcategories()
-        {
-            // Find all products
-            var products = _context.MainCategory
-                //.Select(p => p.Name)
-                .ToList();
-
-            // Return all products
-
-  
-            return Ok(products);
-        }
-
-        // Product output by Id
-        [HttpGet("getProduct/{productId}")]
+        
+        [HttpGet("product/{productId}", Name = "GetProductById")]
         public async Task<ActionResult<Product>> GetProduct(int productId)
         {
             // Finding a product in the database by identifier
             var product = await _context.Product.FindAsync(productId);
 
-            // If the product is not found, return NotFound
             if (product == null)
             {
                 return NotFound();
             }
 
-            // Returning the product in JSON format
             return Ok(product);
         }
 
-
-        // Adding a product
-        [HttpPost("addProduct")]
-        public async Task<ActionResult> AddProduct(Product product)
-        {
-            // Check product for null
-            if (product == null)
+        [HttpPost]
+        public async Task<ActionResult> AddProduct(ProductDTO productDTO)
+        { 
+            if (productDTO == null)
             {
                 return BadRequest("There are no product data to add");
             }
 
-            // Save data
-            _context.Product.Add(product);
+            var newProduct = new Product();
+
+            newProduct.Name = productDTO.Name;
+            newProduct.ImageURL = productDTO.ImageURL;
+            newProduct.SubCategoryId = productDTO.SubCategoryId;
+            newProduct.ListOfProductsId = 1;
+            newProduct.Description = productDTO.Description;
+            newProduct.Price = productDTO.Price;
+            newProduct.CountOfLikes = productDTO.CountOfLikes;
+
+            _context.Product.Add(newProduct);
             await _context.SaveChangesAsync();
 
-            return Ok("Products added successfully");
+            return CreatedAtRoute("GetProductById", new {productId = newProduct.Id}, newProduct);
         }
 
-
-        //To delete a product
-        [HttpDelete("deleteProduct/{productId}")]
-        public async Task<ActionResult> DeleteProduct(int productId)
+        // Delete a product by Id
+        [HttpDelete("{productId}")]
+        public ActionResult DeleteProduct(int productId)
         {
             var product = _context.Product
                 .Include(p => p.Reviews)    
@@ -95,10 +80,10 @@ namespace WebStore.Controllers
                 return NotFound();
             }
 
-            // Отсоединить связанные сущности
+            // Detach Related Entities
             _context.Entry(product).State = EntityState.Detached;
 
-            // Удалить отношения
+            // Delete Relations
             foreach (var review in product.Reviews)
             {
                 _context.Entry(review).State = EntityState.Detached;
@@ -108,26 +93,25 @@ namespace WebStore.Controllers
             {
                 _context.Entry(shoppingCartProduct).State = EntityState.Detached;
             }
-            //foreach (var review in product.Reviews)
-            //{
-            //    _context.Reviews.Remove(review);  // Удаляем каждый отзыв явно
-            //}
+            foreach (var review in product.Reviews)
+            {
+                _context.Reviews.Remove(review);  // Delete every review explicitly
+            }
 
-            //foreach (var shoppingCartProduct in product.ShoppingCartProducts)
-            //{
-            //    _context.ShoppingCartProducts.Remove(shoppingCartProduct);  // Удаляем каждый элемент корзины явно
-            //}
+            foreach (var shoppingCartProduct in product.ShoppingCartProducts)
+            {
+                _context.ShoppingCartProducts.Remove(shoppingCartProduct);  // Delete every cart element explicitly
+            }
 
-            // Теперь удалить продукт
+            // Delete Product
             _context.Product.Remove(product);
-            _context.SaveChanges();
+            _context.SaveChanges(); 
 
             return Ok($"The {product.Name} has been deleted");
         }
 
-
         //To edit a product
-        [HttpPut("EditProduct2/{productId}")]
+        [HttpPut("{productId}")]
         public async Task<IActionResult> EditProduct(int productId, [FromBody] ProductDTO updatedProductDTO)
         {
             try
@@ -143,7 +127,7 @@ namespace WebStore.Controllers
                 existingProduct.Name = updatedProductDTO.Name;
                 existingProduct.ImageURL = updatedProductDTO.ImageURL;
                 existingProduct.SubCategoryId = updatedProductDTO.SubCategoryId;
-                existingProduct.ListOfProductsId = updatedProductDTO.ListOfProductsId;
+                existingProduct.ListOfProductsId = 1;
                 existingProduct.Description = updatedProductDTO.Description;
                 existingProduct.Price = updatedProductDTO.Price;
                 existingProduct.CountOfLikes = updatedProductDTO.CountOfLikes;
@@ -160,12 +144,5 @@ namespace WebStore.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-
-
-
-
-
-        //редактирование и удаление товаров.
     }
 }

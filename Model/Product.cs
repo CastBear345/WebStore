@@ -8,7 +8,7 @@ namespace WebStore.Model
     {
 
         [Key]
-        [JsonIgnore]
+        //[JsonIgnore]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
@@ -32,7 +32,7 @@ namespace WebStore.Model
         [JsonIgnore]
         public SubCategory? SubCategory { get; set; } 
         [JsonIgnore]
-        public ListsOfProducts? ListOfProducts { get; set; } 
+        public ListsOfProducts? ListOfProducts { get; set; }
         [JsonIgnore]
         public List<Reviews>? Reviews { get; set; } 
         [JsonIgnore]
