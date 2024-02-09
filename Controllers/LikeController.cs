@@ -7,7 +7,7 @@ namespace WebStore.Controllers;
 ///     Контроллер управляющий лайками продуктов
 /// </summary>
 [ApiController]
-[Route("{productId}/likes")]
+[Route("api/{productId}/likes")]
 public class LikeController : ControllerBase
 {
     private readonly ApplicationDbContext _context;

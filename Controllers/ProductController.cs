@@ -9,7 +9,7 @@ namespace WebStore.Controllers
     /// <summary>
     ///     Контроллер управляющий продуктами
     /// </summary>
-    [Route("products")]
+    [Route("api/products")]
     [ApiController]
     public class ProductController : ControllerBase
     {

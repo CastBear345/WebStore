@@ -10,7 +10,7 @@ namespace WebStore.Controllers;
 ///     Контроллер управляющий категориями
 /// </summary>
 [ApiController]
-[Route("categories")]
+[Route("api/categories")]
 public class CategoryController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
