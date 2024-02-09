@@ -6,18 +6,34 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WebStore.Controllers
 {
+    /// <summary>
+    ///     Контроллер управляющий продуктами
+    /// </summary>
     [Route("products")]
     [ApiController]
     public class ProductController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+
+        /// <summary>
+        ///     Инициализирует контекст базы данных <see cref="ApplicationDbContext"/>
+        /// </summary>
+        /// <param name="context">Ссылка на контекст базы данных с помощю иньекции зависимостей</param>
         public ProductController(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        /// <summary>
+        ///     Получение списка продуктов по идентификатору подкатегории
+        /// </summary>
+        /// <param name="subcategoryId">Идентификатор подкатегории</param>
+        /// <returns>
+        ///     Ошибку 404 если подкатегория продуктов не найдена
+        ///     Успех 200 со списком продуктов если подкатегория найдена
+        /// </returns>
         [HttpGet("{subcategoryId}")]
-        public IActionResult GetProductsBySubCategory(int subcategoryId)
+        public ActionResult<List<Product>> GetProductsBySubCategory(int subcategoryId)
         {
             if (_context.SubCategory.FirstOrDefault(s => s.Id == subcategoryId) == null)
             {
@@ -28,11 +44,18 @@ namespace WebStore.Controllers
 
             return Ok(products);
         }
-        
+
+        /// <summary>
+        ///     Получение продукта
+        /// </summary>
+        /// <param name="productId">Идентификатор продукта</param>
+        /// <returns>
+        ///     Ошибку 404 если продукт не найден
+        ///     Успех 200 с продуктом если он найден
+        /// </returns>
         [HttpGet("product/{productId}", Name = "GetProductById")]
         public async Task<ActionResult<Product>> GetProduct(int productId)
         {
-            // Finding a product in the database by identifier
             var product = await _context.Product.FindAsync(productId);
 
             if (product == null)
@@ -43,7 +66,15 @@ namespace WebStore.Controllers
             return Ok(product);
         }
 
+        /// <summary>
+        ///     Добавление продукта только для админа
+        /// </summary>
+        /// <param name="productDTO">Создаваемый объект продукта</param>
+        /// <returns>
+        ///     Успех 201 с маршрутом где можно его получить
+        /// </returns>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> AddProduct(ProductDTO productDTO)
         { 
             if (productDTO == null)
@@ -67,8 +98,16 @@ namespace WebStore.Controllers
             return CreatedAtRoute("GetProductById", new {productId = newProduct.Id}, newProduct);
         }
 
-        // Delete a product by Id
+        /// <summary>
+        ///     Удаление продукта только для админа
+        /// </summary>
+        /// <param name="productId">Идентификатор продукта</param>
+        /// <returns>
+        ///     Ошибку 404 если продукт не найден
+        ///     Успех 202 если продукт успешно удалён
+        /// </returns>
         [HttpDelete("{productId}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteProduct(int productId)
         {
             var product = _context.Product
@@ -81,38 +120,41 @@ namespace WebStore.Controllers
                 return NotFound();
             }
 
-            // Detach Related Entities
             _context.Entry(product).State = EntityState.Detached;
 
-            // Delete Relations
             foreach (var review in product.Reviews)
             {
                 _context.Entry(review).State = EntityState.Detached;
             }
-
             foreach (var shoppingCartProduct in product.ShoppingCartProducts)
             {
                 _context.Entry(shoppingCartProduct).State = EntityState.Detached;
             }
             foreach (var review in product.Reviews)
             {
-                _context.Reviews.Remove(review);  // Delete every review explicitly
+                _context.Reviews.Remove(review);
             }
-
             foreach (var shoppingCartProduct in product.ShoppingCartProducts)
             {
-                _context.ShoppingCartProducts.Remove(shoppingCartProduct);  // Delete every cart element explicitly
+                _context.ShoppingCartProducts.Remove(shoppingCartProduct);
             }
 
-            // Delete Product
             _context.Product.Remove(product);
-            _context.SaveChanges(); 
+            _context.SaveChanges();
 
-            return Ok($"The {product.Name} has been deleted");
+            return Accepted($"The {product.Name} has been deleted");
         }
 
-        //To edit a product
+        /// <summary>
+        ///     Обновление продукта только для админа
+        /// </summary>
+        /// <param name="updatedProductDTO">объект с обновлёнными данными продукта</param>
+        /// <returns>
+        ///     Ошибка 404 если обновляемый продукт не найден
+        ///     Успех 201 с маршрутом где можно его получить
+        /// </returns>
         [HttpPut("{productId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditProduct(int productId, [FromBody] ProductDTO updatedProductDTO)
         {
             try
@@ -121,7 +163,7 @@ namespace WebStore.Controllers
 
                 if (existingProduct == null)
                 {
-                    return NotFound(); // Если продукт с заданным идентификатором не найден
+                    return NotFound();
                 }
 
                 // Обновление свойств продукта
@@ -134,14 +176,12 @@ namespace WebStore.Controllers
                 existingProduct.CountOfLikes = updatedProductDTO.CountOfLikes;
 
 
-                // Сохранение изменений
                 await _context.SaveChangesAsync();
 
-                return Ok(); // Успешное редактирование
+                return Ok();
             }
             catch (Exception ex)
             {
-                // Обработка ошибок
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
