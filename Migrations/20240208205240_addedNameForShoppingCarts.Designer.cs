@@ -12,8 +12,8 @@ using WebStore;
 namespace WebStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240207103418_AddedShoppingCartsDescription")]
-    partial class AddedShoppingCartsDescription
+    [Migration("20240208205240_addedNameForShoppingCarts")]
+    partial class addedNameForShoppingCarts
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -206,6 +206,10 @@ namespace WebStore.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
