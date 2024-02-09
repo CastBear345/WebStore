@@ -12,6 +12,7 @@ namespace Swagger.Controllers;
 /// Контроллер, отвечающий за управление текущим пользователем.
 /// </summary>
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class UserController : ControllerBase
 {
@@ -34,7 +35,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpGet("GetCurrentUser")]
-    [Authorize]
     public async Task<ActionResult> GetCurrentUser()
     {
         var currentUser = HttpContext.User.Identity.Name;
@@ -54,7 +54,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpDelete("DeleteCurrentUser")]
-    [Authorize]
     public async Task<ActionResult> DeleteCurrentUser()
     {
         var currentUser = HttpContext.User.Identity.Name;
@@ -81,7 +80,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpPut("UpdateCurrentUser")]
-    [Authorize]
     public async Task<IActionResult> UpdateCurrentUser(RegistrationRequestDTO user)
     {
         var currentUser = HttpContext.User.Identity.Name;
