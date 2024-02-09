@@ -13,6 +13,7 @@ namespace Swagger.Controllers;
 /// Контроллер, отвечающий за административные функции.
 /// </summary>
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 [ApiController]
 public class AdministrationController : ControllerBase
 {
@@ -37,8 +38,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpGet("GetUsersList")]
-    [Authorize(Roles = "Admin")]
+    [HttpGet("getUsersList")]
     public async Task<ActionResult> GetUsersList()
     {
         var currentUser = HttpContext.User.Identity.Name;
@@ -57,8 +57,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpPost("AddUser")]
-    [Authorize(Roles = "Admin")]
+    [HttpPost("addUser")]
     public async Task<ActionResult> AddUser([FromBody] RegistrationRequestDTO model)
     {
         bool isUserNameUnique = _userRepository.IsUniqueUser(model.UserName);
@@ -90,8 +89,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpDelete("DeleteUser/{id}")]
-    [Authorize(Roles = "Admin")]
+    [HttpDelete("deleteUser/{id}")]
     public async Task<ActionResult> DeleteUser(int id)
     {
         var user = await _context.Users.FindAsync(id);
@@ -124,8 +122,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpPut("UpdateUser/{id}")]
-    [Authorize(Roles = "Admin")]
+    [HttpPut("updateUser/{id}")]
     public async Task<IActionResult> UpdateUser(int id, UsersUpdateDTO user)
     {
         var existingUser = await _context.Users.FindAsync(id);
