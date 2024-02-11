@@ -1,10 +1,9 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using Swagger.Models.ModelsDTO;
-using System.Security.Claims;
-using Swagger.Model;
-using System.Text;
-using WebStore;
+﻿using Swagger.Models.ModelsDTO;
 using Swagger.Models;
+using Swagger.Model;
+using WebStore;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace Swagger.Repository;
 
@@ -15,7 +14,7 @@ public class UserRepository : IUserRepository
 {
     #region Поля
 
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext _dbContext;
     protected APIResponse _response;
 
     #endregion
@@ -29,7 +28,7 @@ public class UserRepository : IUserRepository
     /// <param name="configuration">Конфигурация приложения.</param>
     public UserRepository(ApplicationDbContext context)
     {
-        _context = context;
+        _dbContext = context;
     }
 
     #endregion
@@ -43,7 +42,7 @@ public class UserRepository : IUserRepository
     /// <returns>True, если имя пользователя уникально, иначе - false.</returns>
     public bool IsUniqueUser(string username)
     {
-        var user = _context.Users.FirstOrDefault(u => u.UserName == username);
+        var user = _dbContext.Users.FirstOrDefault(u => u.UserName == username);
 
         if (user == null)
             return true;
@@ -56,34 +55,32 @@ public class UserRepository : IUserRepository
     /// </summary>
     /// <param name="loginRequestDTO">DTO для запроса входа.</param>
     /// <returns>DTO ответа на запрос входа.</returns>
-    public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
+    public async Task<LoginResponseDTO?> Login(LoginRequestDTO loginRequestDTO)
     {
-        var user = _context.Users.FirstOrDefault(u =>
+        var user = _dbContext.Users.FirstOrDefault(u =>
             u.UserName.ToLower() == loginRequestDTO.UserName.ToLower()
         );
 
         if (user != null)
         {
             // Используем соль из базы данных для проверки пароля
-            bool isPasswordValid = BCrypt.Net.BCrypt.HashPassword(loginRequestDTO.Password, user.Salt) == user.PasswordHash;
+            var password = BCrypt.Net.BCrypt.HashPassword(loginRequestDTO.Password, user.Salt);
+            bool isPasswordValid = password == user.PasswordHash;
 
             if (isPasswordValid)
-            {
-
-                var loginResponseDTO = new LoginResponseDTO()
+                return new LoginResponseDTO
                 {
-                    User = user,
+                    UserName = user.UserName,
+                    Address = user.Address,
+                    DoC = user.DoC,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Roles = user.Roles
                 };
-
-                return loginResponseDTO;
-            }
         }
 
-        // Если пользователь не найден или пароль неверный, возвращаем пустой токен и null вместо данных пользователя
-        return new LoginResponseDTO
-        {
-            User = null
-        };
+        // Если пользователь не найден или пароль неверный, null вместо данных пользователя
+        return null;
     }
 
     /// <summary>
@@ -107,10 +104,26 @@ public class UserRepository : IUserRepository
             Roles = "User",
         };
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
         return user;
     }
 
+    public ClaimsIdentity ClaimsIdentity(LoginResponseDTO loginResponseDTO)
+    {
+        var user = _dbContext.Users.FirstOrDefault(u =>
+            u.UserName.ToLower() == loginResponseDTO.UserName.ToLower()
+        );
+
+        var claims = new List<Claim>() {
+                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new(ClaimTypes.Name, loginResponseDTO.UserName),
+                    new(ClaimTypes.Role, loginResponseDTO.Roles.ToString()),
+                    new(ClaimTypes.GivenName, loginResponseDTO.FirstName + " " + loginResponseDTO.LastName),
+                };
+
+        var claimsIdentity = new ClaimsIdentity(claims, "cookie");
+        return claimsIdentity;
+    }
     #endregion
 }

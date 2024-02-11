@@ -5,27 +5,35 @@ using Swagger.Models.ModelsDTO;
 using Swagger.Models;
 using System.Net;
 using WebStore;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using Swagger.Repository;
 
 namespace Swagger.Controllers;
 
 /// <summary>
 /// Контроллер, отвечающий за управление текущим пользователем.
 /// </summary>
-[Route("api/[controller]")]
+[Route("api/user")]
 [Authorize]
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<UserController> _logger;
+    private readonly IUserRepository _userRepository;
     protected APIResponse _response;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="UserController"/>.
     /// </summary>
-    /// <param name="context">Контекст базы данных приложения.</param>
-    public UserController(ApplicationDbContext context)
+    /// <param name="dbContext">Контекст базы данных приложения.</param>
+    /// <param name="logger">Логгер.</param>
+    public UserController(ApplicationDbContext dbContext, ILogger<UserController> logger, IUserRepository userRepository)
     {
-        _context = context;
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this._response = new();
     }
 
@@ -34,18 +42,36 @@ public class UserController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpGet("GetCurrentUser")]
+    [HttpGet("getCurrentUser")]
     public async Task<ActionResult> GetCurrentUser()
     {
-        var currentUser = HttpContext.User.Identity.Name;
-        var users = await _context.Users
-            .Where(u => u.UserName == currentUser)
-            .ToListAsync();
-
-        _response.StatusCode = HttpStatusCode.OK;
-        _response.IsSuccess = true;
-        _response.Result = users;
-        return Ok(_response);
+        try
+        {
+            var currentUser = HttpContext.User.Identity.Name;
+            var user = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.UserName == currentUser);
+            var response = new LoginResponseDTO
+            {
+                UserName = user.UserName,
+                Address = user.Address,
+                DoC = user.DoC,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Roles = user.Roles
+            };
+            _response.StatusCode = HttpStatusCode.OK;
+            _response.IsSuccess = true;
+            _response.Result = response;
+            return Ok(_response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Произошла ошибка при получении информации о текущем пользователе.");
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            _response.IsSuccess = false;
+            _response.ErrorMessages.Add("Произошла внутренняя ошибка сервера при получении информации о текущем пользователе.");
+            return StatusCode((int)HttpStatusCode.InternalServerError, _response);
+        }
     }
 
     /// <summary>
@@ -53,25 +79,40 @@ public class UserController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpDelete("DeleteCurrentUser")]
+    [HttpDelete("deleteCurrentUser")]
     public async Task<ActionResult> DeleteCurrentUser()
     {
-        var currentUser = HttpContext.User.Identity.Name;
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUser);
-
-        if (user == null)
+        try
         {
-            _response.StatusCode = HttpStatusCode.NotFound;
-            _response.IsSuccess = false;
-            return NotFound(_response);
+            var currentUser = HttpContext.User.Identity.Name;
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == currentUser);
+
+            if (user == null)
+            {
+                _response.StatusCode = HttpStatusCode.NotFound;
+                _response.IsSuccess = false;
+                return NotFound(_response);
+            }
+
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation("Получен запрос на выход.");
+            await HttpContext.SignOutAsync();
+
+            _response.StatusCode = HttpStatusCode.NoContent;
+            _response.IsSuccess = true;
+            _response.ErrorMessages.Add("Вы успешно удалили свой аккаунт.");
+            return Ok(_response);
         }
-
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
-
-        _response.StatusCode = HttpStatusCode.NoContent;
-        _response.IsSuccess = false;
-        return Ok(_response);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Произошла ошибка при удалении текущего пользователя.");
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            _response.IsSuccess = false;
+            _response.ErrorMessages.Add("Произошла внутренняя ошибка сервера при удалении текущего пользователя.");
+            return StatusCode((int)HttpStatusCode.InternalServerError, _response);
+        }
     }
 
     /// <summary>
@@ -79,46 +120,80 @@ public class UserController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpPut("UpdateCurrentUser")]
+    [HttpPut("updateCurrentUser")]
     public async Task<IActionResult> UpdateCurrentUser(RegistrationRequestDTO user)
     {
-        var currentUser = HttpContext.User.Identity.Name;
-        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUser);
-
-        if (existingUser == null)
-        {
-            _response.StatusCode = HttpStatusCode.NotFound;
-            _response.IsSuccess = false;
-            return NotFound(_response);
-        }
-
         try
         {
-            _context.Entry(existingUser).CurrentValues.SetValues(user);
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!UserExists(existingUser.Id))
+            string? currentUser = HttpContext.User.Identity.Name;
+            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == currentUser);
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password, salt);
+
+            if (existingUser == null)
             {
                 _response.StatusCode = HttpStatusCode.NotFound;
                 _response.IsSuccess = false;
                 return NotFound(_response);
             }
+
+            if (_userRepository.IsUniqueUser(user.UserName) == true)
+            {
+                existingUser.UserName = user.UserName;
+            }
             else
             {
-                throw;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.IsSuccess = false;
+                _response.ErrorMessages.Add("Имя пользователя уже занято");
+                return BadRequest(_response);
             }
+
+            existingUser.PasswordHash = passwordHash;
+            existingUser.Salt = salt;
+            existingUser.FirstName = user.FirstName;
+            existingUser.LastName = user.LastName;
+            existingUser.Address = user.Address;
+
+            _dbContext.Entry(existingUser).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
+
+            // Проверяем, если пользователь уже аутентифицирован, то сначала выходим
+            if (User.Identity.IsAuthenticated)
+            {
+                _logger.LogInformation("Получен запрос на выход.");
+                await HttpContext.SignOutAsync();
+            }
+
+            _logger.LogInformation("Получен запрос на вход.");
+            var loginResponse = await _userRepository.Login(new LoginRequestDTO
+            {
+                UserName = existingUser.UserName,
+                Password = user.Password
+            });
+            await HttpContext.SignInAsync(new ClaimsPrincipal(_userRepository.ClaimsIdentity(loginResponse)));
+
+            _response.StatusCode = HttpStatusCode.NoContent;
+            _response.IsSuccess = true;
+            _response.Result = new LoginResponseDTO
+            {
+                UserName = existingUser.UserName,
+                Address = existingUser.Address,
+                FirstName = existingUser.FirstName,
+                LastName = existingUser.LastName,
+                DoC = existingUser.DoC,
+                Roles = existingUser.Roles
+            };
+            _response.ErrorMessages.Add("Информация о пользователе успешно обновлена.");
+            return Ok(_response);
         }
-
-        _response.StatusCode = HttpStatusCode.NoContent;
-        _response.IsSuccess = false;
-        _response.Result = existingUser;
-        return Ok(_response);
-    }
-
-    private bool UserExists(int id)
-    {
-        return _context.Users.Any(e => e.Id == id);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Произошла ошибка при обновлении информации о текущем пользователе.");
+            _response.StatusCode = HttpStatusCode.InternalServerError;
+            _response.IsSuccess = false;
+            _response.ErrorMessages.Add("Произошла внутренняя ошибка сервера при обновлении информации о текущем пользователе.");
+            return StatusCode((int)HttpStatusCode.InternalServerError, _response);
+        }
     }
 }
