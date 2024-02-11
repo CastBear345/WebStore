@@ -99,6 +99,23 @@ public class AuthorizationController : ControllerBase
         return Ok(_response);
     }
 
+    /// <summary>
+    /// Выход пользователя.
+    /// </summary>
+    /// <param name="model">Модель запроса выхода.</param>
+    /// <returns>Результат операции выхода.</returns>
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<ActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync();
+
+        _response.StatusCode = HttpStatusCode.OK;
+        _response.IsSuccess = true;
+        _response.ErrorMessages.Add("Вы успешно вышли из аккаунта.");
+        return Ok(_response);
+    }
+
     private static ClaimsIdentity ClaimsIdentity(LoginResponseDTO loginResponse)
     {
         var claims = new List<Claim>() {

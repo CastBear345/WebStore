@@ -7,6 +7,7 @@ using WebStore.Model;
 namespace WebStore.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class ReviewController : ControllerBase
 {
@@ -19,8 +20,7 @@ public class ReviewController : ControllerBase
         this._response = new();
     }
 
-    [Authorize]
-    [HttpGet("{productId}/reviews")]
+    [HttpGet("{productId}/getProductReviews")]
     public ActionResult<IEnumerable<Reviews>> GetProductReviews(int productId)
     {
         // Используйте контекст данных для получения отзывов для конкретного продукта
@@ -32,8 +32,7 @@ public class ReviewController : ControllerBase
         return Ok(_response);
     }
 
-    [Authorize]
-    [HttpPost("{productId}/reviews")]
+    [HttpPost("{productId}/addReviews")]
     public async Task<ActionResult<Reviews>> AddReview(int productId, Reviews review)
     {
         if (review == null)
@@ -52,8 +51,7 @@ public class ReviewController : ControllerBase
         return CreatedAtAction(nameof(GetProductReviews), new { productId }, review);
     }
 
-    [Authorize]
-    [HttpDelete("{productId}/reviews/{reviewId}")]
+    [HttpDelete("{productId}/deleteReview/{reviewId}")]
     public async Task<ActionResult> DeleteReview(int productId, int reviewId)
     {
         var review = await _context.Reviews.FindAsync(reviewId);
@@ -81,8 +79,7 @@ public class ReviewController : ControllerBase
         return Ok(_response);
     }
 
-    [Authorize]
-    [HttpPut("{productId}/reviews/{reviewId}")]
+    [HttpPut("{productId}/updateReview/{reviewId}")]
     public async Task<ActionResult<Reviews>> UpdateReview(int productId, int? reviewId, Reviews updatedReview)
     {
         if (updatedReview == null || reviewId == null)
