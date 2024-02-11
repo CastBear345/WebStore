@@ -1,5 +1,6 @@
 ﻿using Swagger.Model;
 using Swagger.Models.ModelsDTO;
+using System.Security.Claims;
 
 namespace Swagger.Repository;
 
@@ -30,6 +31,13 @@ public interface IUserRepository
     /// <param name="registrationRequestDTO">DTO для запроса регистрации.</param>
     /// <returns>Зарегистрированный пользователь.</returns>
     Task<User> Register(RegistrationRequestDTO registrationRequestDTO);
+
+    /// <summary>
+    /// Авторизует пользователя.
+    /// </summary>
+    /// <param name="loginResponseDTO">DTO для запроса создания токена.</param>
+    /// <returns>Авторезированный пользователь.</returns>
+    ClaimsIdentity ClaimsIdentity(LoginResponseDTO loginResponseDTO);
 
     #endregion
 }
