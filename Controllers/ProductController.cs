@@ -33,7 +33,7 @@ namespace WebStore.Controllers
         ///     Успех 200 со списком продуктов если подкатегория найдена
         /// </returns>
         [HttpGet("{subcategoryId}")]
-        public ActionResult<List<Product>> GetProductsBySubCategory(int subcategoryId)
+        public ActionResult<List<Product>> GetProductsBySubCategory(int subcategoryId, SortByEnum sortBy = SortByEnum.ByName, string search = "")
         {
             if (_context.SubCategory.FirstOrDefault(s => s.Id == subcategoryId) == null)
             {
@@ -41,6 +41,25 @@ namespace WebStore.Controllers
             }
 
             var products = _context.Product.Where(c => c.SubCategoryId == subcategoryId).ToList();
+
+            // Сортировка по SortByEnum
+            switch (sortBy)
+            {
+                case SortByEnum.ByName:
+                    products = products.OrderBy(c => c.Name).ToList();
+                    break;
+                case SortByEnum.ByPrice:
+                    products = products.OrderBy(c => c.Price).ToList();
+                    break;
+                case SortByEnum.ByRating:
+                    products = products.OrderBy(c => c.CountOfLikes).ToList();
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                products = products.Where(p => p.Name.Contains(search)).ToList();
+            }
 
             return Ok(products);
         }
