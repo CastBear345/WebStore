@@ -15,7 +15,6 @@ namespace WebStore
         public DbSet<User> Users { get; set; }
         public DbSet<MainCategory> MainCategory { get; set; }
         public DbSet<SubCategory> SubCategory { get; set; }
-        public DbSet<ListsOfProducts> ListsOfProducts { get; set; }
         public DbSet<Product> Product { get; set; }
         public DbSet<Reviews> Reviews { get; set; }
         public DbSet<ShoppingCarts> ShoppingCarts { get; set; }
@@ -63,11 +62,6 @@ namespace WebStore
                 .HasOne(p => p.SubCategory)
                 .WithMany(sc => sc.Product)
                 .HasForeignKey(p => p.SubCategoryId);
-
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.ListOfProducts)
-                .WithMany(lsp => lsp.Product)
-                .HasForeignKey(p => p.ListOfProductsId);
 
             modelBuilder.Entity<Product>()
                 .HasMany(p => p.Reviews)  // Один продукт имеет много отзывов

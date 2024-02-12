@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebStore.Model.ModelDTO;
 using WebStore.Model;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebStore.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize(Roles = "User")]
     [ApiController]
     public class ShoppingCartProductsController : ControllerBase
     {

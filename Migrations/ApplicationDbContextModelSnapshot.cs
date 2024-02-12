@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebStore;
 
@@ -12,11 +11,9 @@ using WebStore;
 namespace WebStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240207103418_AddedShoppingCartsDescription")]
-    partial class AddedShoppingCartsDescription
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,23 +72,6 @@ namespace WebStore.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("WebStore.Model.ListsOfProducts", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ListsOfProducts");
-                });
-
             modelBuilder.Entity("WebStore.Model.MainCategory", b =>
                 {
                     b.Property<int>("Id")
@@ -128,9 +108,6 @@ namespace WebStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ListOfProductsId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -142,8 +119,6 @@ namespace WebStore.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ListOfProductsId");
 
                     b.HasIndex("SubCategoryId");
 
@@ -187,6 +162,12 @@ namespace WebStore.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -206,6 +187,10 @@ namespace WebStore.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -249,19 +234,11 @@ namespace WebStore.Migrations
 
             modelBuilder.Entity("WebStore.Model.Product", b =>
                 {
-                    b.HasOne("WebStore.Model.ListsOfProducts", "ListOfProducts")
-                        .WithMany("Product")
-                        .HasForeignKey("ListOfProductsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("WebStore.Model.SubCategory", "SubCategory")
                         .WithMany("Product")
                         .HasForeignKey("SubCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ListOfProducts");
 
                     b.Navigation("SubCategory");
                 });
@@ -301,11 +278,6 @@ namespace WebStore.Migrations
                         .IsRequired();
 
                     b.Navigation("MainCategory");
-                });
-
-            modelBuilder.Entity("WebStore.Model.ListsOfProducts", b =>
-                {
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("WebStore.Model.MainCategory", b =>
