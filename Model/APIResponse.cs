@@ -20,14 +20,14 @@ public class APIResponse
     public bool IsSuccess { get; set; }
 
     /// <summary>
-    /// Список сообщений об ошибках.
-    /// </summary>
-    public List<string> ErrorMessages { get; set; }
-
-    /// <summary>
     /// Результат запроса.
     /// </summary>
     public object Result { get; set; }
+
+    /// <summary>
+    /// Список сообщений об ошибках.
+    /// </summary>
+    public List<string> ErrorMessages { get; set; }
 
     #endregion
 
