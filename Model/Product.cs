@@ -18,8 +18,6 @@ namespace WebStore.Model
         [ForeignKey("SubCategory")]
         public int SubCategoryId { get; set; }
 
-        [ForeignKey("ListOfProducts")]
-        public int ListOfProductsId { get; set; }
 
         public string Description { get; set; }
 
@@ -29,9 +27,6 @@ namespace WebStore.Model
 
         [JsonIgnore]
         public SubCategory? SubCategory { get; set; } 
-
-        [JsonIgnore]
-        public ListsOfProducts? ListOfProducts { get; set; }
 
         [JsonIgnore]
         public List<Reviews>? Reviews { get; set; }

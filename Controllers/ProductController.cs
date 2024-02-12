@@ -106,7 +106,6 @@ namespace WebStore.Controllers
             newProduct.Name = productDTO.Name;
             newProduct.ImageURL = productDTO.ImageURL;
             newProduct.SubCategoryId = productDTO.SubCategoryId;
-            newProduct.ListOfProductsId = 1;
             newProduct.Description = productDTO.Description;
             newProduct.Price = productDTO.Price;
             newProduct.CountOfLikes = productDTO.CountOfLikes;
@@ -189,7 +188,6 @@ namespace WebStore.Controllers
                 existingProduct.Name = updatedProductDTO.Name;
                 existingProduct.ImageURL = updatedProductDTO.ImageURL;
                 existingProduct.SubCategoryId = updatedProductDTO.SubCategoryId;
-                existingProduct.ListOfProductsId = 1;
                 existingProduct.Description = updatedProductDTO.Description;
                 existingProduct.Price = updatedProductDTO.Price;
                 existingProduct.CountOfLikes = updatedProductDTO.CountOfLikes;
