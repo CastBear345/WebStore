@@ -43,7 +43,7 @@ public class LikeController : ControllerBase
         if (product.LikedUserIds.Any(id => id == currentUser.Id))
             return BadRequest();
 
-        product.CountOfLikes++;
+        product.LikedUserIds.Add(currentUser.Id);
 
         _context.SaveChanges();
 
@@ -71,7 +71,7 @@ public class LikeController : ControllerBase
         if (product.LikedUserIds.Any(id => id != currentUser.Id))
             return BadRequest();
 
-        product.CountOfLikes--;
+        product.LikedUserIds.Remove(currentUser.Id);
 
         _context.SaveChanges();
 

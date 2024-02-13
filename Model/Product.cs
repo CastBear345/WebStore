@@ -23,9 +23,7 @@ namespace WebStore.Model
 
         public decimal Price { get; set; }
 
-        public int CountOfLikes { get; set; }
-
-        public List<int> LikedUserIds { get; set; }
+        public List<int>? LikedUserIds { get; set; }
 
         [JsonIgnore]
         public SubCategory? SubCategory { get; set; } 
