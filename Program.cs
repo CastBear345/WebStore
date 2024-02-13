@@ -28,10 +28,7 @@ if (app.Environment.IsDevelopment())
 // Подключение аутентификации и авторизации
 app.UseAuthentication();
 app.UseAuthorization();
-void  Configuration()
-{
-    app.UseMvc();
-}
+
 app.MapControllers();
 
 app.Run();
