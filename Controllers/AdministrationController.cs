@@ -159,7 +159,7 @@ public class AdministrationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpPut("updateUser/{id}")]
-    public async Task<IActionResult> UpdateUser(int id, UsersUpdateDTO user)
+    public async Task<IActionResult> UpdateUser(int id, UsersDataDTO user)
     {
         try {
             var existingUser = await _dbContext.Users.FindAsync(id);

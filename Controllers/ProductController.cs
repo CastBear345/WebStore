@@ -33,6 +33,7 @@ namespace WebStore.Controllers
         ///     Успех 200 со списком продуктов если подкатегория найдена
         /// </returns>
         [HttpGet("{subcategoryId}")]
+        [AllowAnonymous]
         public ActionResult<List<Product>> GetProductsBySubCategory(int subcategoryId, SortByEnum sortBy = SortByEnum.ByName, string search = "")
         {
             if (_context.SubCategory.FirstOrDefault(s => s.Id == subcategoryId) == null)
@@ -73,6 +74,7 @@ namespace WebStore.Controllers
         ///     Успех 200 с продуктом если он найден
         /// </returns>
         [HttpGet("product/{productId}", Name = "GetProductById")]
+        [AllowAnonymous]
         public async Task<ActionResult<Product>> GetProduct(int productId)
         {
             var product = await _context.Product.FindAsync(productId);

@@ -25,6 +25,8 @@ namespace WebStore.Model
 
         public int CountOfLikes { get; set; }
 
+        public List<int> LikedUserIds { get; set; }
+
         [JsonIgnore]
         public SubCategory? SubCategory { get; set; } 
 

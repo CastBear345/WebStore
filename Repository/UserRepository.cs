@@ -92,6 +92,8 @@ public class UserRepository : IUserRepository
     {
         string salt = BCrypt.Net.BCrypt.GenerateSalt();
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(registrationRequestDTO.Password, salt);
+        
+        string role = "User";
         User user = new()
         {
             UserName = registrationRequestDTO.UserName,
@@ -101,7 +103,7 @@ public class UserRepository : IUserRepository
             LastName = registrationRequestDTO.LastName,
             Address = registrationRequestDTO.Address,
             DoC = DateTime.Now.AddDays(5),
-            Roles = "User",
+            Roles = role,
         };
 
         _dbContext.Users.Add(user);

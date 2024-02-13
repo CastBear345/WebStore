@@ -8,7 +8,7 @@ namespace WebStore.Controllers
     /// <summary>
     ///     Контроллер управляющий подкатегориями
     /// </summary>
-    [Route("api/subcategories")]
+    [Route("api/sub-categories")]
     [ApiController]
     [Authorize(Roles = "Admin")]
     public class SubCategoryController : ControllerBase
