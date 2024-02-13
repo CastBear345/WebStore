@@ -7,6 +7,7 @@ namespace WebStore.Controllers;
 ///     Контроллер управляющий лайками продуктов
 /// </summary>
 [ApiController]
+[Authorize(Roles = "User")]
 [Route("api/{productId}/likes")]
 public class LikeController : ControllerBase
 {
@@ -30,15 +31,17 @@ public class LikeController : ControllerBase
     ///     Успех 201 если лайк успешно добавлен
     /// </returns>
     [HttpPost]
-    [Authorize]
     public IActionResult AddLike(int productId)
     {
+        var user = HttpContext.User.Identity.Name;
+        var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
         var product = _context.Product.FirstOrDefault(p => p.Id == productId);
 
-        if (product == null)
-        {
+        if (product == null || currentUser == null)
             return NotFound();
-        }
+
+        if (product.LikedUserIds.Any(id => id == currentUser.Id))
+            return BadRequest();
 
         product.CountOfLikes++;
 
@@ -56,15 +59,17 @@ public class LikeController : ControllerBase
     ///     Успех 202 если лайк успешно удален
     /// </returns>
     [HttpDelete]
-    [Authorize]
     public IActionResult DeleteLike(int productId)
     {
+        var user = HttpContext.User.Identity.Name;
+        var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
         var product = _context.Product.FirstOrDefault(p => p.Id == productId);
 
-        if (product == null)
-        {
+        if (product == null || currentUser == null)
             return NotFound();
-        }
+
+        if (product.LikedUserIds.Any(id => id != currentUser.Id))
+            return BadRequest();
 
         product.CountOfLikes--;
 

@@ -6,8 +6,8 @@ using WebStore.Model;
 
 namespace WebStore.Controllers;
 
-[Route("api/[controller]")]
-[Authorize]
+[Route("api/review")]
+[Authorize(Roles = "User")]
 [ApiController]
 public class ReviewController : ControllerBase
 {

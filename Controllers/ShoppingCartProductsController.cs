@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WebStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/shopping-cart-products")]
     [Authorize(Roles = "User")]
     [ApiController]
     public class ShoppingCartProductsController : ControllerBase
@@ -21,14 +21,13 @@ namespace WebStore.Controllers
         [HttpGet("GetShoppingCartProducts")]
         public async Task<IActionResult> GetShoppingCartProducts(int shoppingCartId)
         {
-            var products = _context.ShoppingCartProducts.
+            var products = await _context.ShoppingCartProducts.
                 Include(p=>p.Product).
                 Where(p=>p.ShoppingCartId == shoppingCartId).
-                ToList();
-                ;
+                ToListAsync();
+                
             return Ok(products);
         }
-
 
         [HttpPost("AddProductToShoppingCart")]
         public async Task<IActionResult> AddProductToShoppingCart(ShoppingCartProductsDTO shoppingCartProductDTO)
@@ -40,7 +39,7 @@ namespace WebStore.Controllers
                 
             };
             _context.ShoppingCartProducts.Add(newShoppingCartProduct);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
 
             return Ok($"Успешно добавлено в корзину");
@@ -61,7 +60,7 @@ namespace WebStore.Controllers
 
             // Delete Product
             _context.ShoppingCartProducts.Remove(shoppingCartProductToDelete);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok($"Продукт удален с корзины");
         }

@@ -12,7 +12,7 @@ using WebStore;
 namespace WebStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240212135225_first")]
+    [Migration("20240213100939_first")]
     partial class first
     {
         /// <inheritdoc />
@@ -199,6 +199,9 @@ namespace WebStore.Migrations
 
                     b.Property<decimal>("TotalSumOfPrices")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

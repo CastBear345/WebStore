@@ -16,6 +16,9 @@ namespace WebStore.Model
 
         public string Description {  get; set; }
 
+        [ForeignKey("User")]
+        public int UserId { get; set; }
+
         [JsonIgnore]
         public List<ShoppingCartProducts>? ShoppingCartProducts { get; set; }
     }

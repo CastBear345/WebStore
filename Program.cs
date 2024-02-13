@@ -19,7 +19,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -29,7 +28,10 @@ if (app.Environment.IsDevelopment())
 // Подключение аутентификации и авторизации
 app.UseAuthentication();
 app.UseAuthorization();
-
+void  Configuration()
+{
+    app.UseMvc();
+}
 app.MapControllers();
 
 app.Run();

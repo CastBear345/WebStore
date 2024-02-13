@@ -31,6 +31,7 @@ public class CategoryController : ControllerBase
     ///     Успех 200 с списком категорий и их подкатегорий
     /// </returns>
     [HttpGet]
+    [AllowAnonymous]
     public ActionResult GetCateogiries()
     {
         return Ok(_context.MainCategory

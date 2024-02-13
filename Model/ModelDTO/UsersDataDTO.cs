@@ -3,7 +3,7 @@
 /// <summary>
 /// Представляет DTO для обновления информации о пользователе.
 /// </summary>
-public class UsersUpdateDTO
+public class UsersDataDTO
 {
     #region Свойства
 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Swagger.Model;
 
@@ -12,6 +13,8 @@ public class User
     /// <summary>
     /// Уникальный идентификатор пользователя.
     /// </summary>
+    [Key]
+    [JsonIgnore]
     public int Id { get; set; }
 
     /// <summary>

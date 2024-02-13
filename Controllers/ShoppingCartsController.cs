@@ -7,7 +7,7 @@ using WebStore.Model.ModelDTO;
 namespace WebStore.Controllers
 {
     [Authorize(Roles = "User")]
-    [Route("api/[controller]")]
+    [Route("api/shopping-carts")]
     [ApiController]
     public class ShoppingCartsController : ControllerBase
     {
@@ -17,33 +17,51 @@ namespace WebStore.Controllers
             _context = context;
         }
 
-
         [HttpGet("GetShoppingCarts")]
         public async Task<IActionResult> GetShoppingCarts()
         {
-            var shoppingCarts = _context.ShoppingCarts.ToList();
+            var user = HttpContext.User.Identity.Name;
+            var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
+
+            var shoppingCarts = await _context.ShoppingCarts
+                .Where(u => u.UserId == currentUser.Id)
+                .ToListAsync();
+
+            if (shoppingCarts == null)
+                return BadRequest();
+
             return Ok(shoppingCarts);
         }
-
 
         [HttpPost("AddShoppingCart")]
         public async Task<IActionResult> AddShoppingCart(ShoppingCartsDTO shoppingCarts)
         {
+            var user = HttpContext.User.Identity.Name;
+            var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
+
+            if (shoppingCarts.Name == null || shoppingCarts.Description == null)
+                return BadRequest();
+
             var newCategory = new ShoppingCarts()
             {
                 Name = shoppingCarts.Name,
                 Description = shoppingCarts.Description,
+                UserId = currentUser.Id,
             };
+
             _context.ShoppingCarts.Add(newCategory);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok($"Корзинка {shoppingCarts.Name} успешно создано");
         }
 
 
         [HttpPut("UpdateShoppingCart")]
-        public async Task<IActionResult> UpdateShoppingCart(ShoppingCartsDTO shoppingCart, int shoppingCartId)
+        public async Task<IActionResult> UpdateShoppingCart(ShoppingCartsDTO shoppingCart, int? shoppingCartId)
         {
+            if (shoppingCart.Name == null || shoppingCart.Description == null || shoppingCartId == null)
+                return BadRequest();
+
             var shoppingCartToUpdate = _context.ShoppingCarts.FirstOrDefault(c => c.Id == shoppingCartId);
 
             if (shoppingCartToUpdate == null)
@@ -54,7 +72,7 @@ namespace WebStore.Controllers
             shoppingCartToUpdate.Name = shoppingCart.Name;
             shoppingCartToUpdate.Description = shoppingCart.Description;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Created();
         }
 
@@ -88,7 +106,7 @@ namespace WebStore.Controllers
 
             // Delete Product
             _context.ShoppingCarts.Remove(shoppingCartToDelete);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok($"The {shoppingCartToDelete.Name} has been deleted");
         }
