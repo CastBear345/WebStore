@@ -53,7 +53,7 @@ namespace WebStore.Controllers
                     products = products.OrderBy(c => c.Price).ToList();
                     break;
                 case SortByEnum.ByRating:
-                    products = products.OrderBy(c => c.LikedUserIds.Count()).ToList();
+                    products = products.OrderBy(c => c.Reviews).ToList();//Нужно доработать
                     break;
             }
 
@@ -110,7 +110,6 @@ namespace WebStore.Controllers
             newProduct.SubCategoryId = productDTO.SubCategoryId;
             newProduct.Description = productDTO.Description;
             newProduct.Price = productDTO.Price;
-            newProduct.LikedUserIds = null;
 
             _context.Product.Add(newProduct);
             await _context.SaveChangesAsync();

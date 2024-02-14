@@ -37,9 +37,10 @@ namespace WebStore.Controllers
         public async Task<IActionResult> AddShoppingCart(ShoppingCartsDTO shoppingCarts)
         {
             var user = HttpContext.User.Identity.Name;
-            var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == user);
+            var existingShoppingCarts = _context.ShoppingCarts.Where(s => s.Name == shoppingCarts.Name);
 
-            if (shoppingCarts.Name == null || shoppingCarts.Description == null)
+            if (shoppingCarts.Name == null || shoppingCarts.Description == null || existingShoppingCarts != null)
                 return BadRequest();
 
             var newCategory = new ShoppingCarts()

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swagger.Models.ModelsDTO;
 using System.Security.Claims;
-using Swagger.Repository;
 using Swagger.Models;
 using System.Net;
+using WebStore.Services.Interfacies;
 
 namespace Swagger.Controllers;
 

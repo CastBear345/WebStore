@@ -35,6 +35,10 @@ public class ReviewController : ControllerBase
     [HttpPost("{productId}/addReviews")]
     public async Task<ActionResult<Reviews>> AddReview(int productId, Reviews review)
     {
+        var user = HttpContext.User.Identity.Name;
+        var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
+        var product = await _context.Product.FindAsync(productId);
+
         if (review == null)
         {
             _response.StatusCode = HttpStatusCode.BadRequest;
@@ -43,9 +47,19 @@ public class ReviewController : ControllerBase
             return BadRequest(_response);
         }
 
-        review.ProductId = productId; // Устанавливаем идентификатор продукта
+        //product.Grade += review.Grade;
+
+        //bektur's method
+
+        review.ProductId = product.Id;
+        review.UserId = currentUser.Id;
 
         _context.Reviews.Add(review);
+
+        product.Grade = (int)product.Reviews.Average(r => r.Grade);
+
+
+        _context.Product.Add(product);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProductReviews), new { productId }, review);
@@ -80,9 +94,9 @@ public class ReviewController : ControllerBase
     }
 
     [HttpPut("{productId}/updateReview/{reviewId}")]
-    public async Task<ActionResult<Reviews>> UpdateReview(int productId, int? reviewId, Reviews updatedReview)
+    public async Task<ActionResult<Reviews>> UpdateReview(int productId, int reviewId, Reviews updatedReview)
     {
-        if (updatedReview == null || reviewId == null)
+        if (updatedReview == null)
         {
             _response.StatusCode = HttpStatusCode.BadRequest;
             _response.IsSuccess = true;
