@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Swagger.Repository;
 using WebStore;
+using WebStore.Services.Interfacies;
 
 var builder = WebApplication.CreateBuilder(args);
 

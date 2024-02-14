@@ -18,12 +18,11 @@ namespace WebStore.Model
         [ForeignKey("SubCategory")]
         public int SubCategoryId { get; set; }
 
-
         public string Description { get; set; }
 
         public decimal Price { get; set; }
 
-        public List<int>? LikedUserIds { get; set; }
+        public int Grade { get; set; } = 0;
 
         [JsonIgnore]
         public SubCategory? SubCategory { get; set; } 

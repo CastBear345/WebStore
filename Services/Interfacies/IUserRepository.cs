@@ -2,7 +2,7 @@
 using Swagger.Models.ModelsDTO;
 using System.Security.Claims;
 
-namespace Swagger.Repository;
+namespace WebStore.Services.Interfacies;
 
 /// <summary>
 /// Представляет репозиторий пользователей.

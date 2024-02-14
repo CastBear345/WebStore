@@ -7,7 +7,7 @@ using System.Net;
 using WebStore;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
-using Swagger.Repository;
+using WebStore.Services.Interfacies;
 
 namespace Swagger.Controllers;
 
