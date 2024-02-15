@@ -17,9 +17,11 @@ namespace WebStore.Model
 
         public int Grade { get; set; }
 
+        [JsonIgnore]
         [ForeignKey("User")]
         public int UserId { get; set; }
 
+        [JsonIgnore]
         [ForeignKey("Product")]
         public int ProductId { get; set; }
         [JsonIgnore]

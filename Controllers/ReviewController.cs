@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Swagger.Models;
 using System.Net;
 using WebStore.Model;
@@ -20,7 +21,7 @@ public class ReviewController : ControllerBase
         this._response = new();
     }
 
-    [HttpGet("{productId}/getProductReviews")]
+    [HttpGet("{productId}/all-reviews")]
     public ActionResult<IEnumerable<Reviews>> GetProductReviews(int productId)
     {
         // Используйте контекст данных для получения отзывов для конкретного продукта
@@ -32,7 +33,7 @@ public class ReviewController : ControllerBase
         return Ok(_response);
     }
 
-    [HttpPost("{productId}/addReviews")]
+    [HttpPost("{productId}/add-reviews")]
     public async Task<ActionResult<Reviews>> AddReview(int productId, Reviews review)
     {
         var user = HttpContext.User.Identity.Name;
@@ -47,8 +48,6 @@ public class ReviewController : ControllerBase
             return BadRequest(_response);
         }
 
-        //product.Grade += review.Grade;
-
         //bektur's method
 
         review.ProductId = product.Id;
@@ -56,19 +55,31 @@ public class ReviewController : ControllerBase
 
         _context.Reviews.Add(review);
 
-        product.Grade = (int)product.Reviews.Average(r => r.Grade);
+        // Обновляем существующий продукт
+        var reviewsForProduct = _context.Reviews.Where(r => r.ProductId == productId);
+        if (reviewsForProduct.Any())
+        {
+            var averageGrade = (int)reviewsForProduct.Average(r => r.Grade);
+            if(averageGrade > 10)
+                product.Grade = 10;
+            else
+                product.Grade = averageGrade;
+        }
+        else
+        {
+            product.Grade = 0;
+        }
 
-
-        _context.Product.Add(product);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProductReviews), new { productId }, review);
     }
 
-    [HttpDelete("{productId}/deleteReview/{reviewId}")]
+    [HttpDelete("{productId}/del-review/{reviewId}")]
     public async Task<ActionResult> DeleteReview(int productId, int reviewId)
     {
-        var review = await _context.Reviews.FindAsync(reviewId);
+        var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId);
+        var product = await _context.Product.FindAsync(productId);
 
         if (review == null)
         {
@@ -88,12 +99,29 @@ public class ReviewController : ControllerBase
         _context.Reviews.Remove(review);
         await _context.SaveChangesAsync();
 
+        // Пересчитываем среднюю оценку продукта без учёта удалённого отзыва
+        var remainingReviews = await _context.Reviews.Where(r => r.ProductId == productId).ToListAsync();
+        if (remainingReviews.Any())
+        {
+            var averageGrade = (int)remainingReviews.Average(r => r.Grade);
+            if (averageGrade > 10)
+                product.Grade = 10;
+            else
+                product.Grade = averageGrade;
+        }
+        else
+        {
+            product.Grade = 0;
+        }
+
+        await _context.SaveChangesAsync();
+
         _response.StatusCode = HttpStatusCode.OK;
         _response.IsSuccess = true;
         return Ok(_response);
     }
 
-    [HttpPut("{productId}/updateReview/{reviewId}")]
+    [HttpPut("{productId}/up-review/{reviewId}")]
     public async Task<ActionResult<Reviews>> UpdateReview(int productId, int reviewId, Reviews updatedReview)
     {
         if (updatedReview == null)
