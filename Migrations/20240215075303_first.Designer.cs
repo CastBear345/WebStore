@@ -12,7 +12,7 @@ using WebStore;
 namespace WebStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240214141749_first")]
+    [Migration("20240215075303_first")]
     partial class first
     {
         /// <inheritdoc />
