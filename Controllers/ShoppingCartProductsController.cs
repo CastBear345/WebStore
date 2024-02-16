@@ -18,7 +18,7 @@ namespace WebStore.Controllers
         }
 
 
-        [HttpGet("GetShoppingCartProducts")]
+        [HttpGet("all-products-shopping-cart")]
         public async Task<IActionResult> GetShoppingCartProducts(int shoppingCartId)
         {
             var user = HttpContext.User.Identity.Name;
@@ -37,7 +37,7 @@ namespace WebStore.Controllers
             return Ok(products);
         }
 
-        [HttpPost("AddProductToShoppingCart")]
+        [HttpPost("add-product-shopping-cart")]
         public async Task<IActionResult> AddProductToShoppingCart(ShoppingCartProductsDTO shoppingCartProductDTO)
         {
             var user = HttpContext.User.Identity.Name;
@@ -45,9 +45,10 @@ namespace WebStore.Controllers
 
             var newShoppingCartProduct = new ShoppingCartProducts()
             {
-                ProductId=shoppingCartProductDTO.ProductId,
-                ShoppingCartId=shoppingCartProductDTO.ShoppingCartId,
+                ProductId = shoppingCartProductDTO.ProductId,
+                ShoppingCartId = shoppingCartProductDTO.ShoppingCartId,
                 UserId = currentUser.Id,
+                Quantity = shoppingCartProductDTO.ProductQuantity,
             };
             _context.ShoppingCartProducts.Add(newShoppingCartProduct);
             await _context.SaveChangesAsync();
@@ -56,9 +57,7 @@ namespace WebStore.Controllers
             return Ok($"Успешно добавлено в корзину");
         }
 
-
-
-        [HttpDelete("DeleteShoppingCartProduct")]
+        [HttpDelete("{shoppingCartProductId}/delete-product-shopping-cart")]
         public async Task<IActionResult> DeleteShoppingCartProduct(int shoppingCartProductId)
         {
             var user = HttpContext.User.Identity.Name;
@@ -77,6 +76,26 @@ namespace WebStore.Controllers
             await _context.SaveChangesAsync();
 
             return Ok($"Продукт удален с корзины");
+        }
+
+        [HttpPut("{shoppingCartProductId}/change-product-shopping-cart")]
+        public async Task<IActionResult> ChangeProductToShoppingCart(int shoppingCartProductId, ShoppingCartProductsDTO shoppingCartProductDTO)
+        {
+            var user = HttpContext.User.Identity.Name;
+            var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
+
+            var shoppingCartProductToChange = _context.ShoppingCartProducts
+                .FirstOrDefault(p => p.Id == shoppingCartProductId && p.UserId == currentUser.Id);
+
+            if (shoppingCartProductToChange == null)
+                return NotFound();
+
+            var newShoppingCartProduct = new ShoppingCartProducts() {Quantity = shoppingCartProductDTO.ProductQuantity,};
+
+            _context.ShoppingCartProducts.Add(newShoppingCartProduct);
+            await _context.SaveChangesAsync();
+
+            return Ok($"Продукт успешно изменен");
         }
     }
 }

@@ -11,10 +11,8 @@ namespace WebStore.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [ForeignKey("ShoppingCart")]
         public int ShoppingCartId { get; set; }
 
-        [ForeignKey("Product")]
         public int ProductId { get; set; }
 
         public int Quantity { get; set; }
@@ -23,10 +21,9 @@ namespace WebStore.Model
         public int UserId { get; set; }
 
         [JsonIgnore]
-
         public ShoppingCarts? ShoppingCarts { get; set; }
-        [JsonIgnore]
 
+        [JsonIgnore]
         public Product? Product { get; set; }
     }
 }

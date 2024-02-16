@@ -23,6 +23,7 @@ namespace WebStore.Model
         public decimal Price { get; set; }
 
         public int Grade { get; set; } = 0;
+        public int FreqPurchases { get; set; } = 0;
 
         [JsonIgnore]
         public SubCategory? SubCategory { get; set; } 
