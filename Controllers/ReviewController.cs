@@ -50,6 +50,7 @@ public class ReviewController : ControllerBase
 
         //bektur's method
 
+        review.Name = currentUser.FirstName + currentUser.LastName;
         review.ProductId = product.Id;
         review.UserId = currentUser.Id;
 
@@ -81,7 +82,7 @@ public class ReviewController : ControllerBase
         var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId);
         var product = await _context.Product.FindAsync(productId);
 
-        if (review == null)
+        if (review == null || product == null)
         {
             _response.StatusCode = HttpStatusCode.NotFound;
             _response.IsSuccess = true;
@@ -124,7 +125,9 @@ public class ReviewController : ControllerBase
     [HttpPut("{productId}/up-review/{reviewId}")]
     public async Task<ActionResult<Reviews>> UpdateReview(int productId, int reviewId, Reviews updatedReview)
     {
-        if (updatedReview == null)
+        var product = await _context.Product.FindAsync(productId);
+
+        if (updatedReview == null || product == null)
         {
             _response.StatusCode = HttpStatusCode.BadRequest;
             _response.IsSuccess = true;
@@ -144,6 +147,20 @@ public class ReviewController : ControllerBase
         existingReview.Content = updatedReview.Content;
         existingReview.Grade = updatedReview.Grade;
         existingReview.ProductId = productId;
+
+        var remainingReviews = await _context.Reviews.Where(r => r.ProductId == productId).ToListAsync();
+        if (remainingReviews.Any())
+        {
+            var averageGrade = (int)remainingReviews.Average(r => r.Grade);
+            if (averageGrade > 10)
+                product.Grade = 10;
+            else
+                product.Grade = averageGrade;
+        }
+        else
+        {
+            product.Grade = 0;
+        }
 
         await _context.SaveChangesAsync();
 

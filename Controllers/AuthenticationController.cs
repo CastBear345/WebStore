@@ -6,6 +6,10 @@ using System.Security.Claims;
 using Swagger.Models;
 using System.Net;
 using WebStore.Services.Interfacies;
+using WebStore.Model;
+using Microsoft.EntityFrameworkCore;
+using WebStore;
+using Swagger.Model;
 
 namespace Swagger.Controllers;
 
@@ -19,6 +23,7 @@ public class AuthenticationController : ControllerBase
 {
     protected APIResponse _response;
     private readonly IUserRepository _userRepository;
+    private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<AuthenticationController> _logger;
 
     /// <summary>
@@ -27,10 +32,11 @@ public class AuthenticationController : ControllerBase
     /// <param name="dbContext">Контекст базы данных приложения.</param>
     /// <param name="userRepository">Репозиторий пользователей.</param>
     /// <param name="logger">Логгер.</param>
-    public AuthenticationController(IUserRepository userRepository, ILogger<AuthenticationController> logger)
+    public AuthenticationController(IUserRepository userRepository, ILogger<AuthenticationController> logger, ApplicationDbContext dbContext)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         this._response = new();
     }
 
@@ -76,6 +82,24 @@ public class AuthenticationController : ControllerBase
             var loginResponse = await _userRepository.Login(loginRequest);
 
             await HttpContext.SignInAsync(new ClaimsPrincipal(_userRepository.ClaimsIdentity(loginResponse)));
+
+            var favoriteProducts = new ShoppingCarts
+            {
+                UserId = user.Id,
+                Name = "Favorite",
+                Description = "Your favorite products",
+            };
+
+            var shoppingBusket = new ShoppingCarts
+            {
+                UserId = user.Id,
+                Name = "Shopping Busket",
+                Description = "Your shopping cart"
+            };
+
+            _dbContext.ShoppingCarts.Add(favoriteProducts);
+            _dbContext.ShoppingCarts.Add(shoppingBusket);
+            await _dbContext.SaveChangesAsync();
 
             // Возвращаем данные пользователя
             _response.StatusCode = HttpStatusCode.OK;

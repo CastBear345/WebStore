@@ -17,7 +17,7 @@ namespace WebStore.Controllers
             _context = context;
         }
 
-        [HttpGet("GetShoppingCarts")]
+        [HttpGet("all-shopping-carts")]
         public async Task<IActionResult> GetShoppingCarts()
         {
             var user = HttpContext.User.Identity.Name;
@@ -33,7 +33,7 @@ namespace WebStore.Controllers
             return Ok(shoppingCarts);
         }
 
-        [HttpPost("AddShoppingCart")]
+        [HttpPost("add-shopping-cart")]
         public async Task<IActionResult> AddShoppingCart(ShoppingCartsDTO shoppingCarts)
         {
             var user = HttpContext.User.Identity.Name;
@@ -57,7 +57,7 @@ namespace WebStore.Controllers
         }
 
 
-        [HttpPut("UpdateShoppingCart")]
+        [HttpPut("update-shopping-cart")]
         public async Task<IActionResult> UpdateShoppingCart(ShoppingCartsDTO shoppingCart, int? shoppingCartId)
         {
             if (shoppingCart.Name == null || shoppingCart.Description == null || shoppingCartId == null)
@@ -78,7 +78,7 @@ namespace WebStore.Controllers
         }
 
 
-        [HttpDelete("DeleteShoppingCart")]
+        [HttpDelete("delete-shopping-cart")]
         public async Task<IActionResult> DeleteShoppingCart(int shoppingCartId)
         {
             var shoppingCartToDelete = _context.ShoppingCarts
