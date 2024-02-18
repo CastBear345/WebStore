@@ -16,7 +16,7 @@ namespace Swagger.Controllers;
 /// <summary>
 /// Контроллер, отвечающий за авторизацию пользователей.
 /// </summary>
-[Route("api/authentication")]
+[Route("api/users")]
 [ApiController]
 [AllowAnonymous]
 public class AuthenticationController : ControllerBase
@@ -45,8 +45,8 @@ public class AuthenticationController : ControllerBase
     /// </summary>
     /// <param name="model">Модель запроса регистрации.</param>
     /// <returns>Результат операции регистрации.</returns>
-    [HttpPost("register")]
-    public async Task<ActionResult> Register(RegistrationRequestDTO model)
+    [HttpPost("sign-up")]
+    public async Task<ActionResult> SignUp(RegistrationRequestDTO model)
     {
         try
         {
@@ -124,8 +124,8 @@ public class AuthenticationController : ControllerBase
     /// </summary>
     /// <param name="model">Модель запроса входа.</param>
     /// <returns>Результат операции входа.</returns>
-    [HttpPost("login")]
-    public async Task<ActionResult> Login(LoginRequestDTO model)
+    [HttpPost("sign-in")]
+    public async Task<ActionResult> SignIn(LoginRequestDTO model)
     {
         try
         {
@@ -172,9 +172,9 @@ public class AuthenticationController : ControllerBase
     /// </summary>
     /// <param name="model">Модель запроса выхода.</param>
     /// <returns>Результат операции выхода.</returns>
-    [HttpPost("logout")]
+    [HttpPost("sign-out")]
     [Authorize]
-    public async Task<ActionResult> Logout()
+    public async Task<ActionResult> SignOut()
     {
         try {
             _logger.LogInformation("Получен запрос на выход.");

@@ -12,7 +12,7 @@ using WebStore;
 namespace WebStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240216113430_first")]
+    [Migration("20240218114421_first")]
     partial class first
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace WebStore.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseCollation("Latin1_General_100_CI_AS_SC_UTF8")
                 .HasAnnotation("ProductVersion", "8.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 

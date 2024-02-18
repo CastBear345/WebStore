@@ -29,9 +29,12 @@ namespace WebStore
             optionsBuilder.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
         }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            // Установка коллации для всех таблиц в базе данных
+            modelBuilder.UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
 
             // Указываем, что Id должен генерироваться при добавлении записи
             modelBuilder.Entity<User>()
