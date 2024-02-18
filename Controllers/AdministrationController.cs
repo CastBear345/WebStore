@@ -43,7 +43,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpGet("getUsersList")]
+    [HttpGet("all-users")]
     public async Task<ActionResult> GetUsersList()
     {
         try
@@ -73,7 +73,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpPost("addUser")]
+    [HttpPost("add-user")]
     public async Task<ActionResult> AddUser([FromBody] RegistrationRequestDTO model)
     {
         try
@@ -116,7 +116,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpDelete("deleteUser/{id}")]
+    [HttpDelete("del-user/{id}")]
     public async Task<ActionResult> DeleteUser(int id)
     {
         try {
@@ -159,7 +159,7 @@ public class AdministrationController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpPut("updateUser/{id}")]
+    [HttpPut("upd-user/{id}")]
     public async Task<IActionResult> UpdateUser(int id, UsersDataDTO user)
     {
         try {

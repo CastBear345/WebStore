@@ -13,7 +13,7 @@ namespace WebStore.Controllers;
 [Route("api/categories")]
 public class CategoryController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ApplicationDbContext _dbContext;
 
     /// <summary>
     ///     Инициализирует контекст базы данных <see cref="ApplicationDbContext"/>
@@ -21,7 +21,7 @@ public class CategoryController : ControllerBase
     /// <param name="context">Ссылка на контекст базы данных с помощю иньекции зависимостей</param>
     public CategoryController(ApplicationDbContext context)
     {
-        _context = context;
+        _dbContext = context;
     }
 
     /// <summary>
@@ -30,11 +30,11 @@ public class CategoryController : ControllerBase
     /// <returns>
     ///     Успех 200 с списком категорий и их подкатегорий
     /// </returns>
-    [HttpGet]
+    [HttpGet("all-categories")]
     [AllowAnonymous]
     public ActionResult GetCateogiries()
     {
-        return Ok(_context.MainCategory
+        return Ok(_dbContext.MainCategory
             .Include(p => p.SubCategory)
             .ToList());
     }
@@ -46,7 +46,7 @@ public class CategoryController : ControllerBase
     /// <returns>
     ///     Успех 201 если категория успешно добавлена
     /// </returns>
-    [HttpPost]
+    [HttpPost("add-category")]
     [Authorize(Roles = "Admin")]
     public IActionResult AddCategory(CategoryCreationDto category)
     {
@@ -55,8 +55,8 @@ public class CategoryController : ControllerBase
             Name = category.Name,
         };
 
-        _context.MainCategory.Add(newCategory);
-        _context.SaveChanges();
+        _dbContext.MainCategory.Add(newCategory);
+        _dbContext.SaveChanges();
 
         return Created();
     }
@@ -70,11 +70,11 @@ public class CategoryController : ControllerBase
     ///     Ошибку 404 если категория не найдена
     ///     Успех 204 если категория успешно обновлена
     /// </returns>
-    [HttpPut("{categoryId}")]
+    [HttpPut("{categoryId}/upd-category")]
     [Authorize(Roles = "Admin")]
     public IActionResult UpdateCategory(CategoryUpdateDto category, int categoryId)
     {
-        var categoryToUpdate = _context.MainCategory.FirstOrDefault(c => c.Id == categoryId);
+        var categoryToUpdate = _dbContext.MainCategory.FirstOrDefault(c => c.Id == categoryId);
 
         if (categoryToUpdate == null)
         {
@@ -83,7 +83,7 @@ public class CategoryController : ControllerBase
 
         categoryToUpdate.Name = category.Name;
 
-        _context.SaveChanges();
+        _dbContext.SaveChanges();
         return NoContent();
     }
 }

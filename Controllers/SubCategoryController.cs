@@ -13,7 +13,7 @@ namespace WebStore.Controllers
     [Authorize(Roles = "Admin")]
     public class SubCategoryController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _dbContext;
 
         /// <summary>
         ///     Инициализирует контекст базы данных <see cref="ApplicationDbContext"/>
@@ -21,7 +21,7 @@ namespace WebStore.Controllers
         /// <param name="context">Ссылка на контекст базы данных с помощю иньекции зависимостей</param>
         public SubCategoryController(ApplicationDbContext context)
         {
-            _context = context;
+            _dbContext = context;
         }
 
         /// <summary>
@@ -32,18 +32,18 @@ namespace WebStore.Controllers
         ///     Ошибку 404 если подкатегория не найдена
         ///     Успех 204 если подкатегория успешно удалена
         /// </returns>
-        [HttpDelete("{subCategoryId}")]
+        [HttpDelete("{subCategoryId}/del-sub-category")]
         public IActionResult DeleteSubCategory(int subCategoryId)
         {
-            var subcategoryToDelete = _context.SubCategory.FirstOrDefault(s => s.Id == subCategoryId);
+            var subcategoryToDelete = _dbContext.SubCategory.FirstOrDefault(s => s.Id == subCategoryId);
 
             if (subcategoryToDelete == null)
             {
                 return NotFound();
             }
 
-            _context.SubCategory.Remove(subcategoryToDelete);
-            _context.SaveChanges();
+            _dbContext.SubCategory.Remove(subcategoryToDelete);
+            _dbContext.SaveChanges();
 
             return NoContent();
         }
@@ -57,11 +57,11 @@ namespace WebStore.Controllers
         ///     Ошибку 404 если подкатегория не найдена
         ///     Успех 204 если подкатегория успешно обновлена
         /// </returns>
-        [HttpPut("{subCategoryId}")]
-        public IActionResult UpdateSubcategory(int subCategoryId, SubCategoryUpdateDto subCategory)
+        [HttpPut("{subCategoryId}/upd-sub-category")]
+        public IActionResult UpdateSubcategory(int subCategoryId, SubCategoryUpdateDTO subCategory)
         {
-            var subcategoryToUpdate = _context.SubCategory.FirstOrDefault(s => s.Id == subCategoryId);
-            var doesMainCategoryIdExist = _context.MainCategory.Any(c => c.Id == subCategory.MainCategoryId);
+            var subcategoryToUpdate = _dbContext.SubCategory.FirstOrDefault(s => s.Id == subCategoryId);
+            var doesMainCategoryIdExist = _dbContext.MainCategory.Any(c => c.Id == subCategory.MainCategoryId);
 
             if (subcategoryToUpdate == null || !doesMainCategoryIdExist)
             {
@@ -73,7 +73,7 @@ namespace WebStore.Controllers
             subcategoryToUpdate.ImageURL = subCategory.ImageURL;
             subcategoryToUpdate.MainCategoryId = subCategory.MainCategoryId;
 
-            _context.SaveChanges();
+            _dbContext.SaveChanges();
 
             return NoContent();
         }
@@ -86,10 +86,10 @@ namespace WebStore.Controllers
         ///     Ошибку 404 если родительская категория подкатегории не найдена
         ///     Успех 201 если подкатегория успешно создана
         /// </returns>
-        [HttpPost]
+        [HttpPost("add-sub-category")]
         public IActionResult CreateSubCategory(SubCategoryCreationDto subCategory)
         {
-            var doesMainCategoryIdExist = _context.MainCategory.Any(c => c.Id == subCategory.MainCategoryId);
+            var doesMainCategoryIdExist = _dbContext.MainCategory.Any(c => c.Id == subCategory.MainCategoryId);
 
             if (!doesMainCategoryIdExist)
             {
@@ -104,8 +104,8 @@ namespace WebStore.Controllers
                 IconURL = subCategory.IconURL,
             };
 
-            _context.SubCategory.Add(newSubcategory);
-            _context.SaveChanges();
+            _dbContext.SubCategory.Add(newSubcategory);
+            _dbContext.SaveChanges();
 
             return Created();
         }

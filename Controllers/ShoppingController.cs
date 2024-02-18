@@ -34,82 +34,32 @@ public class ShoppingController : ControllerBase
         return Ok(products);
     }
 
-    [HttpPost("add-shopping-cart")]
-    public async Task<IActionResult> AddShoppingCart(ShoppingCartsDTO shoppingCarts)
+    [HttpPost("buy-products")]
+    public async Task<IActionResult> AddShoppingCart()
     {
         var user = HttpContext.User.Identity.Name;
-        var currentUser = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.UserName == user);
-
+        var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == user);
         if (currentUser == null)
             return BadRequest();
 
-        var shoppingProducts = await _dbContext.ShoppingCarts
-            .Where(c => c.Name == "Shopping Busket" && c.UserId == currentUser.Id)
-            .ToListAsync();
+        var shoppingCart = await _dbContext.ShoppingCarts
+            .Include(sc => sc.ShoppingCartProducts)
+            .ThenInclude(scp => scp.Product)
+            .FirstOrDefaultAsync(sc => sc.Name == "Shopping Busket" && sc.UserId == currentUser.Id);
 
-        if (shoppingProducts == null)
+        if (shoppingCart == null)
             return BadRequest();
 
-        if (shoppingCarts.Name == null || shoppingCarts.Description == null)
-            return BadRequest();
-        
+        // Соберите список продуктов из корзины пользователя
+        var products = shoppingCart.ShoppingCartProducts.Select(scp => scp.Product).ToList();
+
+        // Получите адрес пользователя
+        var userAddress = currentUser.Address;
+
+        // Удалите все продукты из корзины покупок
+        _dbContext.ShoppingCartProducts.RemoveRange(shoppingCart.ShoppingCartProducts);
         await _dbContext.SaveChangesAsync();
 
-        return Ok($"Корзинка {shoppingCarts.Name} успешно создано");
-    }
-
-    [HttpPut("update-shopping-cart")]
-    public async Task<IActionResult> UpdateShoppingCart(ShoppingCartsDTO shoppingCart, int? shoppingCartId)
-    {
-        if (shoppingCart.Name == null || shoppingCart.Description == null || shoppingCartId == null)
-            return BadRequest();
-
-        var shoppingCartToUpdate = _dbContext.ShoppingCarts.FirstOrDefault(c => c.Id == shoppingCartId);
-
-        if (shoppingCartToUpdate == null)
-        {
-            return NotFound();
-        }
-
-        shoppingCartToUpdate.Name = shoppingCart.Name;
-        shoppingCartToUpdate.Description = shoppingCart.Description;
-
-        await _dbContext.SaveChangesAsync();
-        return Created();
-    }
-
-    [HttpDelete("delete-shopping-cart")]
-    public async Task<IActionResult> DeleteShoppingCart(int shoppingCartId)
-    {
-        var shoppingCartToDelete = _dbContext.ShoppingCarts
-            .Include(p => p.ShoppingCartProducts)
-            .FirstOrDefault(p => p.Id == shoppingCartId);
-
-        if (shoppingCartToDelete == null)
-        {
-            return NotFound();
-        }
-
-        // Detach Related Entities
-        _dbContext.Entry(shoppingCartToDelete).State = EntityState.Detached;
-
-        // Delete Relations
-
-        foreach (var shoppingCartProduct in shoppingCartToDelete.ShoppingCartProducts)
-        {
-            _dbContext.Entry(shoppingCartProduct).State = EntityState.Detached;
-        }
-
-        foreach (var shoppingCartProduct in shoppingCartToDelete.ShoppingCartProducts)
-        {
-            _dbContext.ShoppingCartProducts.Remove(shoppingCartProduct);  // Delete every cart element explicitly
-        }
-
-        // Delete Product
-        _dbContext.ShoppingCarts.Remove(shoppingCartToDelete);
-        await _dbContext.SaveChangesAsync();
-
-        return Ok($"The {shoppingCartToDelete.Name} has been deleted");
+        return Ok($"Покупка успешно совершена. Продукты будут доставлены по адресу: {userAddress}");
     }
 }
