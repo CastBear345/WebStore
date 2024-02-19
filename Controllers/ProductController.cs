@@ -59,7 +59,7 @@ namespace WebStore.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                products = products.Where(p => p.Name.Contains(search)).ToList();
+                products = products.Where(p => p.Name.ToLower().Contains(search.ToLower())).ToList();
             }
 
             return Ok(products);

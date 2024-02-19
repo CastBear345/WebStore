@@ -5,6 +5,15 @@ using WebStore.Services.Interfacies;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "frontend_cors",
+                      policy =>
+                      {
+                          policy.WithOrigins("*");
+                      });
+});
+
 // Регистрация зависимостей
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
@@ -25,6 +34,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(builder => 
+    builder.AllowAnyOrigin()
+           .AllowAnyHeader()
+           .AllowAnyMethod()
+);
 
 // Подключение аутентификации и авторизации
 app.UseAuthentication();
