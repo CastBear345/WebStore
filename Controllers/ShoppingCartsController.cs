@@ -11,19 +11,19 @@ namespace WebStore.Controllers
     [ApiController]
     public class ShoppingCartsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _dbContext;
         public ShoppingCartsController(ApplicationDbContext context)
         {
-            _context = context;
+            _dbContext = context;
         }
 
-        [HttpGet("GetShoppingCarts")]
+        [HttpGet("all-shopping-carts")]
         public async Task<IActionResult> GetShoppingCarts()
         {
             var user = HttpContext.User.Identity.Name;
-            var currentUser = _context.Users.FirstOrDefault(u => u.UserName == user);
+            var currentUser = _dbContext.Users.FirstOrDefault(u => u.UserName == user);
 
-            var shoppingCarts = await _context.ShoppingCarts
+            var shoppingCarts = await _dbContext.ShoppingCarts
                 .Where(u => u.UserId == currentUser.Id)
                 .ToListAsync();
 
@@ -33,12 +33,12 @@ namespace WebStore.Controllers
             return Ok(shoppingCarts);
         }
 
-        [HttpPost("AddShoppingCart")]
+        [HttpPost("add-shopping-cart")]
         public async Task<IActionResult> AddShoppingCart(ShoppingCartsDTO shoppingCarts)
         {
             var user = HttpContext.User.Identity.Name;
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == user);
-            var existingShoppingCarts = _context.ShoppingCarts.Where(s => s.Name == shoppingCarts.Name);
+            var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == user);
+            var existingShoppingCarts = _dbContext.ShoppingCarts.Where(s => s.Name == shoppingCarts.Name);
 
             if (shoppingCarts.Name == null || shoppingCarts.Description == null || existingShoppingCarts != null)
                 return BadRequest();
@@ -50,20 +50,20 @@ namespace WebStore.Controllers
                 UserId = currentUser.Id,
             };
 
-            _context.ShoppingCarts.Add(newCategory);
-            await _context.SaveChangesAsync();
+            _dbContext.ShoppingCarts.Add(newCategory);
+            await _dbContext.SaveChangesAsync();
 
             return Ok($"Корзинка {shoppingCarts.Name} успешно создано");
         }
 
 
-        [HttpPut("UpdateShoppingCart")]
+        [HttpPut("upd-shopping-cart")]
         public async Task<IActionResult> UpdateShoppingCart(ShoppingCartsDTO shoppingCart, int? shoppingCartId)
         {
             if (shoppingCart.Name == null || shoppingCart.Description == null || shoppingCartId == null)
                 return BadRequest();
 
-            var shoppingCartToUpdate = _context.ShoppingCarts.FirstOrDefault(c => c.Id == shoppingCartId);
+            var shoppingCartToUpdate = _dbContext.ShoppingCarts.FirstOrDefault(c => c.Id == shoppingCartId);
 
             if (shoppingCartToUpdate == null)
             {
@@ -73,15 +73,15 @@ namespace WebStore.Controllers
             shoppingCartToUpdate.Name = shoppingCart.Name;
             shoppingCartToUpdate.Description = shoppingCart.Description;
 
-            await _context.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
             return Created();
         }
 
 
-        [HttpDelete("DeleteShoppingCart")]
+        [HttpDelete("del-shopping-cart")]
         public async Task<IActionResult> DeleteShoppingCart(int shoppingCartId)
         {
-            var shoppingCartToDelete = _context.ShoppingCarts
+            var shoppingCartToDelete = _dbContext.ShoppingCarts
                 .Include(p => p.ShoppingCartProducts)
                 .FirstOrDefault(p => p.Id == shoppingCartId);
 
@@ -91,23 +91,23 @@ namespace WebStore.Controllers
             }
 
             // Detach Related Entities
-            _context.Entry(shoppingCartToDelete).State = EntityState.Detached;
+            _dbContext.Entry(shoppingCartToDelete).State = EntityState.Detached;
 
             // Delete Relations
 
             foreach (var shoppingCartProduct in shoppingCartToDelete.ShoppingCartProducts)
             {
-                _context.Entry(shoppingCartProduct).State = EntityState.Detached;
+                _dbContext.Entry(shoppingCartProduct).State = EntityState.Detached;
             }
 
             foreach (var shoppingCartProduct in shoppingCartToDelete.ShoppingCartProducts)
             {
-                _context.ShoppingCartProducts.Remove(shoppingCartProduct);  // Delete every cart element explicitly
+                _dbContext.ShoppingCartProducts.Remove(shoppingCartProduct);  // Delete every cart element explicitly
             }
 
             // Delete Product
-            _context.ShoppingCarts.Remove(shoppingCartToDelete);
-            await _context.SaveChangesAsync();
+            _dbContext.ShoppingCarts.Remove(shoppingCartToDelete);
+            await _dbContext.SaveChangesAsync();
 
             return Ok($"The {shoppingCartToDelete.Name} has been deleted");
         }

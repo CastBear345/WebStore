@@ -6,19 +6,24 @@ using System.Security.Claims;
 using Swagger.Models;
 using System.Net;
 using WebStore.Services.Interfacies;
+using WebStore.Model;
+using Microsoft.EntityFrameworkCore;
+using WebStore;
+using Swagger.Model;
 
 namespace Swagger.Controllers;
 
 /// <summary>
 /// Контроллер, отвечающий за авторизацию пользователей.
 /// </summary>
-[Route("api/authentication")]
+[Route("api/users")]
 [ApiController]
 [AllowAnonymous]
 public class AuthenticationController : ControllerBase
 {
     protected APIResponse _response;
     private readonly IUserRepository _userRepository;
+    private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<AuthenticationController> _logger;
 
     /// <summary>
@@ -27,10 +32,11 @@ public class AuthenticationController : ControllerBase
     /// <param name="dbContext">Контекст базы данных приложения.</param>
     /// <param name="userRepository">Репозиторий пользователей.</param>
     /// <param name="logger">Логгер.</param>
-    public AuthenticationController(IUserRepository userRepository, ILogger<AuthenticationController> logger)
+    public AuthenticationController(IUserRepository userRepository, ILogger<AuthenticationController> logger, ApplicationDbContext dbContext)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         this._response = new();
     }
 
@@ -39,8 +45,8 @@ public class AuthenticationController : ControllerBase
     /// </summary>
     /// <param name="model">Модель запроса регистрации.</param>
     /// <returns>Результат операции регистрации.</returns>
-    [HttpPost("register")]
-    public async Task<ActionResult> Register(RegistrationRequestDTO model)
+    [HttpPost("sign-up")]
+    public async Task<ActionResult> SignUp(RegistrationRequestDTO model)
     {
         try
         {
@@ -77,6 +83,24 @@ public class AuthenticationController : ControllerBase
 
             await HttpContext.SignInAsync(new ClaimsPrincipal(_userRepository.ClaimsIdentity(loginResponse)));
 
+            var favoriteProducts = new ShoppingCarts
+            {
+                UserId = user.Id,
+                Name = "Favorite",
+                Description = "Your favorite products",
+            };
+
+            var shoppingBusket = new ShoppingCarts
+            {
+                UserId = user.Id,
+                Name = "Shopping Busket",
+                Description = "Your shopping cart"
+            };
+
+            _dbContext.ShoppingCarts.Add(favoriteProducts);
+            _dbContext.ShoppingCarts.Add(shoppingBusket);
+            await _dbContext.SaveChangesAsync();
+
             // Возвращаем данные пользователя
             _response.StatusCode = HttpStatusCode.OK;
             _response.IsSuccess = true;
@@ -100,8 +124,8 @@ public class AuthenticationController : ControllerBase
     /// </summary>
     /// <param name="model">Модель запроса входа.</param>
     /// <returns>Результат операции входа.</returns>
-    [HttpPost("login")]
-    public async Task<ActionResult> Login(LoginRequestDTO model)
+    [HttpPost("sign-in")]
+    public async Task<ActionResult> SignIn(LoginRequestDTO model)
     {
         try
         {
@@ -148,9 +172,9 @@ public class AuthenticationController : ControllerBase
     /// </summary>
     /// <param name="model">Модель запроса выхода.</param>
     /// <returns>Результат операции выхода.</returns>
-    [HttpPost("logout")]
+    [HttpPost("sign-out")]
     [Authorize]
-    public async Task<ActionResult> Logout()
+    public async Task<ActionResult> SignOut()
     {
         try {
             _logger.LogInformation("Получен запрос на выход.");

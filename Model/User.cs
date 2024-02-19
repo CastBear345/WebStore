@@ -35,6 +35,7 @@ public class User
     /// Соль для хэширования пароля пользователя.
     /// </summary>
     [StringLength(500)]
+    [Required]
     public string Salt { get; set; } = String.Empty;
 
     /// <summary>
@@ -54,6 +55,7 @@ public class User
     /// <summary>
     /// Дата создания пользователя.
     /// </summary>
+    [Required]
     public DateTime DoC { get; set; }
 
     /// <summary>
@@ -66,7 +68,7 @@ public class User
     /// <summary>
     /// Роли пользователя.
     /// </summary>
-    public required string Roles { get; set; }
+    public required string Roles { get; set; } = "User";
 
     #endregion
 }

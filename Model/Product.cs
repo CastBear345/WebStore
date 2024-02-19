@@ -24,6 +24,8 @@ namespace WebStore.Model
 
         public int Grade { get; set; } = 0;
 
+        public int FreqPurchases { get; set; } = 0;
+
         [JsonIgnore]
         public SubCategory? SubCategory { get; set; } 
 

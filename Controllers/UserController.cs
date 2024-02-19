@@ -42,7 +42,7 @@ public class UserController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpGet("getCurrentUser")]
+    [HttpGet("current-user")]
     public async Task<ActionResult> GetCurrentUser()
     {
         try
@@ -79,7 +79,7 @@ public class UserController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpDelete("deleteCurrentUser")]
+    [HttpDelete("del-current-user")]
     public async Task<ActionResult> DeleteCurrentUser()
     {
         try
@@ -120,7 +120,7 @@ public class UserController : ControllerBase
     /// </summary>
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [HttpPut("updateCurrentUser")]
+    [HttpPut("upd-current-user")]
     public async Task<IActionResult> UpdateCurrentUser(RegistrationRequestDTO user)
     {
         try

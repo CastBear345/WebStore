@@ -19,13 +19,12 @@ namespace WebStore.Model
 
         public int Quantity { get; set; }
 
+        [JsonIgnore]
         [ForeignKey("User")]
         public int UserId { get; set; }
 
         [JsonIgnore]
-
         public ShoppingCarts? ShoppingCarts { get; set; }
-        [JsonIgnore]
 
         public Product? Product { get; set; }
     }

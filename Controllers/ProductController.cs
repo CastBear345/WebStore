@@ -13,7 +13,7 @@ namespace WebStore.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _dbContext;
 
         /// <summary>
         ///     Инициализирует контекст базы данных <see cref="ApplicationDbContext"/>
@@ -21,7 +21,7 @@ namespace WebStore.Controllers
         /// <param name="context">Ссылка на контекст базы данных с помощю иньекции зависимостей</param>
         public ProductController(ApplicationDbContext context)
         {
-            _context = context;
+            _dbContext = context;
         }
 
         /// <summary>
@@ -32,16 +32,16 @@ namespace WebStore.Controllers
         ///     Ошибку 404 если подкатегория продуктов не найдена
         ///     Успех 200 со списком продуктов если подкатегория найдена
         /// </returns>
-        [HttpGet("{subcategoryId}")]
+        [HttpGet("{subcategoryId}/all-products")]
         [AllowAnonymous]
         public ActionResult<List<Product>> GetProductsBySubCategory(int subcategoryId, SortByEnum sortBy = SortByEnum.ByName, string search = "")
         {
-            if (_context.SubCategory.FirstOrDefault(s => s.Id == subcategoryId) == null)
+            if (_dbContext.SubCategory.FirstOrDefault(s => s.Id == subcategoryId) == null)
             {
                 return NotFound();
             }
 
-            var products = _context.Product.Where(c => c.SubCategoryId == subcategoryId).ToList();
+            var products = _dbContext.Product.Where(c => c.SubCategoryId == subcategoryId).ToList();
 
             // Сортировка по SortByEnum
             switch (sortBy)
@@ -73,11 +73,11 @@ namespace WebStore.Controllers
         ///     Ошибку 404 если продукт не найден
         ///     Успех 200 с продуктом если он найден
         /// </returns>
-        [HttpGet("product/{productId}", Name = "GetProductById")]
+        [HttpGet("product/{productId}")]
         [AllowAnonymous]
         public async Task<ActionResult<Product>> GetProduct(int productId)
         {
-            var product = await _context.Product.FindAsync(productId);
+            var product = await _dbContext.Product.FindAsync(productId);
 
             if (product == null)
             {
@@ -94,7 +94,7 @@ namespace WebStore.Controllers
         /// <returns>
         ///     Успех 201 с маршрутом где можно его получить
         /// </returns>
-        [HttpPost]
+        [HttpPost("add-product")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> AddProduct(ProductDTO productDTO)
         { 
@@ -111,8 +111,8 @@ namespace WebStore.Controllers
             newProduct.Description = productDTO.Description;
             newProduct.Price = productDTO.Price;
 
-            _context.Product.Add(newProduct);
-            await _context.SaveChangesAsync();
+            _dbContext.Product.Add(newProduct);
+            await _dbContext.SaveChangesAsync();
 
             return CreatedAtRoute("GetProductById", new {productId = newProduct.Id}, newProduct);
         }
@@ -125,11 +125,11 @@ namespace WebStore.Controllers
         ///     Ошибку 404 если продукт не найден
         ///     Успех 202 если продукт успешно удалён
         /// </returns>
-        [HttpDelete("{productId}")]
+        [HttpDelete("del-product/{productId}")]
         [Authorize(Roles = "Admin")]
         public ActionResult DeleteProduct(int productId)
         {
-            var product = _context.Product
+            var product = _dbContext.Product
                 .Include(p => p.Reviews)    
                 .Include(p => p.ShoppingCartProducts)
                 .FirstOrDefault(p => p.Id == productId);
@@ -139,27 +139,27 @@ namespace WebStore.Controllers
                 return NotFound();
             }
 
-            _context.Entry(product).State = EntityState.Detached;
+            _dbContext.Entry(product).State = EntityState.Detached;
 
             foreach (var review in product.Reviews)
             {
-                _context.Entry(review).State = EntityState.Detached;
+                _dbContext.Entry(review).State = EntityState.Detached;
             }
             foreach (var shoppingCartProduct in product.ShoppingCartProducts)
             {
-                _context.Entry(shoppingCartProduct).State = EntityState.Detached;
+                _dbContext.Entry(shoppingCartProduct).State = EntityState.Detached;
             }
             foreach (var review in product.Reviews)
             {
-                _context.Reviews.Remove(review);
+                _dbContext.Reviews.Remove(review);
             }
             foreach (var shoppingCartProduct in product.ShoppingCartProducts)
             {
-                _context.ShoppingCartProducts.Remove(shoppingCartProduct);
+                _dbContext.ShoppingCartProducts.Remove(shoppingCartProduct);
             }
 
-            _context.Product.Remove(product);
-            _context.SaveChanges();
+            _dbContext.Product.Remove(product);
+            _dbContext.SaveChanges();
 
             return Accepted($"The {product.Name} has been deleted");
         }
@@ -172,13 +172,13 @@ namespace WebStore.Controllers
         ///     Ошибка 404 если обновляемый продукт не найден
         ///     Успех 201 с маршрутом где можно его получить
         /// </returns>
-        [HttpPut("{productId}")]
+        [HttpPut("upd-product/{productId}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditProduct(int productId, [FromBody] ProductDTO updatedProductDTO)
         {
             try
             {
-                var existingProduct = await _context.Product.FindAsync(productId);
+                var existingProduct = await _dbContext.Product.FindAsync(productId);
 
                 if (existingProduct == null)
                 {
@@ -193,7 +193,7 @@ namespace WebStore.Controllers
                 existingProduct.Price = updatedProductDTO.Price;
 
 
-                await _context.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
 
                 return Ok();
             }
