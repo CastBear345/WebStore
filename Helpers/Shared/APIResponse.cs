@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Swagger.Models;
+namespace WebStore.Helpers.Shared;
 
 /// <summary>
 /// Представляет ответ API.

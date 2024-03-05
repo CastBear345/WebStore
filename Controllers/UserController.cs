@@ -2,12 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Swagger.Models.ModelsDTO;
-using Swagger.Models;
 using System.Net;
 using WebStore;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using WebStore.Services.Interfacies;
+using WebStore.Helpers.Shared;
 
 namespace Swagger.Controllers;
 

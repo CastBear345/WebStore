@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Настройка аутентификации с использованием JWT-токенов
+// Настройка аутентификации
 builder.Services.AddAuthentication().AddCookie("cookie");
 
 // Добавление подключения к базе данных

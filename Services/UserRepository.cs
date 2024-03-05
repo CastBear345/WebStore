@@ -1,10 +1,10 @@
 ﻿using Swagger.Models.ModelsDTO;
-using Swagger.Models;
 using Swagger.Model;
 using WebStore;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using WebStore.Services.Interfacies;
+using WebStore.Helpers.Shared;
 
 namespace Swagger.Repository;
 

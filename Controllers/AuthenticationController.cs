@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swagger.Models.ModelsDTO;
 using System.Security.Claims;
-using Swagger.Models;
 using System.Net;
 using WebStore.Services.Interfacies;
 using WebStore.Model;
 using Microsoft.EntityFrameworkCore;
 using WebStore;
 using Swagger.Model;
+using WebStore.Helpers.Shared;
 
 namespace Swagger.Controllers;
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebStore.Model.ModelDTO;
 using WebStore.Model;
 using Microsoft.AspNetCore.Authorization;
+using WebStore.Helpers.Enums;
 
 namespace WebStore.Controllers
 {

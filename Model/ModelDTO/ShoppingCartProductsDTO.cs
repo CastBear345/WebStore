@@ -8,6 +8,9 @@ namespace WebStore.Model.ModelDTO
         public int ShoppingCartId { get; set; }
 
         [Required]
+        public string ShoppingCartName { get; set; }
+
+        [Required]
         public int ProductId { get; set; }
 
         [Required]

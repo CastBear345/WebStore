@@ -38,7 +38,7 @@ namespace WebStore.Controllers
         {
             var user = HttpContext.User.Identity.Name;
             var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == user);
-            var existingShoppingCarts = _dbContext.ShoppingCarts.Where(s => s.Name == shoppingCarts.Name);
+            var existingShoppingCarts = await _dbContext.ShoppingCarts.FirstOrDefaultAsync(s => s.UserId == currentUser.Id && s.Name == shoppingCarts.Name);
 
             if (shoppingCarts.Name == null || shoppingCarts.Description == null || existingShoppingCarts != null)
                 return BadRequest();
@@ -57,7 +57,7 @@ namespace WebStore.Controllers
         }
 
 
-        [HttpPut("upd-shopping-cart")]
+        [HttpPut("{shoppingCartId}/upd-shopping-cart")]
         public async Task<IActionResult> UpdateShoppingCart(ShoppingCartsDTO shoppingCart, int? shoppingCartId)
         {
             if (shoppingCart.Name == null || shoppingCart.Description == null || shoppingCartId == null)
@@ -78,7 +78,7 @@ namespace WebStore.Controllers
         }
 
 
-        [HttpDelete("del-shopping-cart")]
+        [HttpDelete("{shoppingCartId}/del-shopping-cart")]
         public async Task<IActionResult> DeleteShoppingCart(int shoppingCartId)
         {
             var shoppingCartToDelete = _dbContext.ShoppingCarts

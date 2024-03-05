@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Swagger.Models;
 using System.Net;
+using WebStore.Helpers.Shared;
 using WebStore.Model;
 
 namespace WebStore.Controllers;

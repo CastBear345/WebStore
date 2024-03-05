@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Swagger.Models.ModelsDTO;
 using Swagger.Repository;
-using Swagger.Models;
 using System.Net;
 using WebStore;
 using Azure;
 using WebStore.Services.Interfacies;
+using WebStore.Helpers.Shared;
 
 namespace Swagger.Controllers;
 
@@ -15,6 +15,7 @@ namespace Swagger.Controllers;
 /// Контроллер, отвечающий за административные функции.
 /// </summary>
 [Route("api/admin")]
+[Authorize(Roles = "Owner")]
 [Authorize(Roles = "Admin")]
 [ApiController]
 public class AdministrationController : ControllerBase

@@ -1,4 +1,4 @@
-﻿namespace WebStore.Model;
+﻿namespace WebStore.Helpers.Enums;
 
 public enum SortByEnum
 {

@@ -17,15 +17,15 @@ namespace WebStore.Controllers
             _dbContext = context;
         }
 
-        [HttpGet("{shoppingCartId}/all-products-shopping-cart")]
-        public async Task<IActionResult> GetShoppingCartProducts(int shoppingCartId)
+        [HttpGet("{shoppingCartName}/all-products-shopping-cart")]
+        public async Task<IActionResult> GetShoppingCartProducts(string shoppingCartName)
         {
             var user = HttpContext.User.Identity.Name;
             var currentUser = _dbContext.Users.FirstOrDefault(u => u.UserName == user);
 
             var products = await _dbContext.ShoppingCartProducts.
                 Include(p=>p.Product).
-                Where(p=>p.ShoppingCartId == shoppingCartId && p.ShoppingCarts.UserId == currentUser.Id).
+                Where(p=> p.ShoppingCarts.UserId == currentUser.Id && p.ShoppingCarts.Name == shoppingCartName).
                 ToListAsync();
 
             if (products == null)
@@ -41,25 +41,41 @@ namespace WebStore.Controllers
         {
             var user = HttpContext.User.Identity.Name;
             var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == user);
+            var cart = await _dbContext.ShoppingCarts.FirstOrDefaultAsync(s => s.UserId == currentUser.Id && s.Name == shoppingCartProductDTO.ShoppingCartName);
             var product = await _dbContext.Product.FindAsync(shoppingCartProductDTO.ProductId);
+
             if (product == null)
             {
                 return NotFound($"Продукт с id {shoppingCartProductDTO.ProductId} не найден");
             }
 
-            var newShoppingCartProduct = new ShoppingCartProducts()
+            // Проверяем, есть ли уже такой продукт в корзине пользователя
+            var existingItem = await _dbContext.ShoppingCartProducts
+                .FirstOrDefaultAsync(p => p.ProductId == product.Id && p.UserId == currentUser.Id);
+
+            if (existingItem != null)
             {
-                ProductId = product.Id,
-                ShoppingCartId = shoppingCartProductDTO.ShoppingCartId,
-                Quantity = shoppingCartProductDTO.ProductQuantity,
-                UserId = currentUser.Id,
-            };
-            _dbContext.ShoppingCartProducts.Add(newShoppingCartProduct);
+                // Если продукт уже есть в корзине, обновляем количество
+                existingItem.Quantity += shoppingCartProductDTO.ProductQuantity;
+            }
+            else
+            {
+                // Иначе добавляем новый продукт в корзину
+                var newShoppingCartProduct = new ShoppingCartProducts()
+                {
+                    ProductId = product.Id,
+                    ShoppingCartId = cart.Id,
+                    Quantity = shoppingCartProductDTO.ProductQuantity,
+                    UserId = currentUser.Id,
+                };
+                _dbContext.ShoppingCartProducts.Add(newShoppingCartProduct);
+            }
+
             await _dbContext.SaveChangesAsync();
 
-
-            return Ok($"Успешно добавлено в корзину");
+            return Ok($"{product.Name} успешно добавлено в корзину");
         }
+
 
         [HttpDelete("{shoppingCartProductId}/del-product-shopping-cart")]
         public async Task<IActionResult> DeleteShoppingCartProduct(int shoppingCartProductId)
